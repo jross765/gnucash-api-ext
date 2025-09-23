@@ -1,0 +1,112 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.gnucash</groupId>
+		<artifactId>gnucash</artifactId>
+		<version>1.7.0</version>
+	</parent>
+
+	<artifactId>gnucash-api-ext</artifactId>
+
+	<name>${project.title} : API Extensions</name>
+
+	<properties>
+
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<schnorxolib-base-systemPath>/home/xxx/Programme-ProdReady/schnorxoborx/schnorxolib-base-0.1.1.jar</schnorxolib-base-systemPath>
+
+	</properties>
+
+	<repositories>
+
+		<repository>
+			<id>central</id>
+			<url>http://repo.maven.apache.org/maven2/</url>
+		</repository>
+
+	</repositories>
+
+	<dependencyManagement>
+	
+		<dependencies>
+
+			<dependency>
+				<groupId>org.gnucash</groupId>
+				<artifactId>gnucash-base</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.gnucash</groupId>
+				<artifactId>gnucash-api</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+		</dependencies>
+		
+	</dependencyManagement>
+
+	<dependencies>
+
+		<!-- ::EMPTY -->
+
+		<!-- *********************************************************  -->
+		
+		<dependency>
+			<groupId>xyz.schnorxoborx.schnorxolib</groupId>
+			<artifactId>schnorxolib-base</artifactId>
+			<version>0.1.1</version>
+			<scope>system</scope>
+			<systemPath>${schnorxolib-base-systemPath}</systemPath>
+		</dependency>
+
+		<!-- *********************************************************  -->
+
+		<!-- GnuCash Base -->
+		<dependency>
+			<groupId>org.gnucash</groupId>
+			<artifactId>gnucash-base</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- GnuCash API -->
+		<dependency>
+			<groupId>org.gnucash</groupId>
+			<artifactId>gnucash-api</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+		</dependency>
+
+	</dependencies>
+
+
+	<build>
+
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.6.3</version>
+				<configuration>
+					<show>private</show>
+					<nohelp>true</nohelp>
+					<!-- <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable> -->
+					<javadocExecutable>/usr/bin/javadoc</javadocExecutable>
+				</configuration>
+			</plugin>
+      
+		</plugins>
+
+	</build>
+
+</project>
