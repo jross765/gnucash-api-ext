@@ -1,5 +1,7 @@
 # Notes on the Module "API Extensions"
 
+## What Does It Do?
+
 This module provides simplified, high-level access functions to a 
 GnuCash 
 file via the "API" module (sort of "macros") for specialized, complex tasks.
@@ -23,6 +25,16 @@ This sub-module contains classes that help to...
 * find transaction and splits by setting filter criteria,
 * merge stock account transcations,
 * generally manipulate transactions in a more convenient way than by using the pure API.
+
+## What is This Repo's Relationship with the Other Repos?
+
+* This is a module-level repository which is part of a multi-module project, i.e. it has a parent and several siblings. 
+
+  [Parent](https://github.com/jross765/JGnuCashLibNTools.git)
+
+* Under normal circumstances, you cannot compile it on its own (at least not without further preparation), but instead, you should clone it together with the other repos and use the parent repo's build-script.
+
+* This repository contains no history before V. 1.7 (cf. notes in parent repo).
 
 ## Major Changes
 ### V. 1.6 &rarr; 1.7
