@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>org.gnucash</groupId>
 		<artifactId>gnucash</artifactId>
-		<version>1.7.0</version>
+		<version>1.8</version>
 	</parent>
 
 	<artifactId>gnucash-api-ext</artifactId>
-
 	<name>${project.title} : API Extensions</name>
+	<version>1.7.0</version>
 
 	<properties>
 
@@ -37,7 +37,7 @@
 			<dependency>
 				<groupId>org.gnucash</groupId>
 				<artifactId>gnucash-base</artifactId>
-				<version>${project.version}</version>
+				<version>1.7.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -45,7 +45,7 @@
 			<dependency>
 				<groupId>org.gnucash</groupId>
 				<artifactId>gnucash-api</artifactId>
-				<version>${project.version}</version>
+				<version>1.7.1</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -74,7 +74,7 @@
 		<dependency>
 			<groupId>org.gnucash</groupId>
 			<artifactId>gnucash-base</artifactId>
-			<version>${project.version}</version>
+			<version>1.7.0</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -82,7 +82,7 @@
 		<dependency>
 			<groupId>org.gnucash</groupId>
 			<artifactId>gnucash-api</artifactId>
-			<version>${project.version}</version>
+			<version>1.7.1</version>
 			<scope>compile</scope>
 		</dependency>
 
