@@ -93,7 +93,7 @@ public class SecuritiesAccountTransactionManager {
      * and generates additional splits for taxes/fees
      * (simple variant).
      * 
-     * @param gcshFile KMyMoney file
+     * @param gcshFile GnuCash file
      * @param stockAcctID ID the the stock account
      * @param taxFeeAcctID ID of the expenses account for the taxes/fees
      * @param offsetAcctID ID of the offsetting account
@@ -134,7 +134,7 @@ public class SecuritiesAccountTransactionManager {
      * and generates additional splits for taxes/fees
      * (general variant).
      * 
-     * @param gcshFile KMyMoney file
+     * @param gcshFile GnuCash file
      * @param stockAcctID ID the the stock account
      * @param expensesAcctAmtList list of pairs (acctID/amount)
      * that represents all taxes / fees for this transaction
@@ -298,7 +298,7 @@ public class SecuritiesAccountTransactionManager {
      * splits for taxes/fees.
      * (simple variant).
      * 
-     * @param gcshFile KMyMoney file
+     * @param gcshFile GnuCash file
      * @param stockAcctID ID of the stock account
      * @param incomeAcctID ID of the income account
      * @param taxFeeAcctID ID of the expenses account for the taxes/fees
@@ -340,7 +340,7 @@ public class SecuritiesAccountTransactionManager {
      * splits for taxes/fees.
      * (general variant).
      * 
-     * @param gcshFile KMyMoney file
+     * @param gcshFile GnuCash file
      * @param stockAcctID ID of the stock account
      * @param incomeAcctID ID of the income account
      * @param expensesAcctAmtList list of pairs (acctID/amount) 
