@@ -3,8 +3,8 @@ package org.gnucash.apiext.trxmgr;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.gnucash.api.read.GnuCashFile;
 import org.gnucash.api.read.GnuCashTransactionSplit;
-import org.gnucash.api.write.GnuCashWritableFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,11 +15,11 @@ public class TransactionSplitFinder {
     
     // ---------------------------------------------------------------
     
-	private GnuCashWritableFile gcshFile = null;
+	private GnuCashFile gcshFile = null;
 	
     // ---------------------------------------------------------------
 	
-	public TransactionSplitFinder(GnuCashWritableFile gcshFile) {
+	public TransactionSplitFinder(GnuCashFile gcshFile) {
 		if ( gcshFile == null ) {
 			throw new IllegalArgumentException("null gnucash-file object given");
 		}

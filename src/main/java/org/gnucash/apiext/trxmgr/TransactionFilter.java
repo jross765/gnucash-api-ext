@@ -5,15 +5,17 @@ import java.time.LocalDate;
 import org.gnucash.api.read.GnuCashTransaction;
 import org.gnucash.api.read.GnuCashTransactionSplit;
 
-import xyz.schnorxoborx.base.dateutils.DateHelpers;
-import xyz.schnorxoborx.base.dateutils.LocalDateHelpers;
-
 public class TransactionFilter {
 	
 	public enum SplitLogic {
 		AND, // split criteria have to apply to every single split
 		OR   // it's enough if split criteria apply to one or just a few splits
 	}
+	
+	// ---------------------------------------------------------------
+
+	public static final LocalDate DATE_UNSET     = LocalDate.of(1900, 1, 1); // LocalDateHelpers.DATE_UNSET
+	public static final int       NOF_SPLT_UNSET = 0;
 	
 	// ---------------------------------------------------------------
 	// Transaction Level
@@ -23,6 +25,9 @@ public class TransactionFilter {
 	
 	public LocalDate datePostedFrom;
 	public LocalDate datePostedTo;
+	
+	public LocalDate dateEnteredFrom;
+	public LocalDate dateEnteredTo;
 	
 	public int nofSpltFrom;
 	public int nofSpltTo;
@@ -46,16 +51,14 @@ public class TransactionFilter {
 	private void init() {
 		// type = null;
 
-		try {
-			datePostedFrom = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
-			datePostedTo = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
-		} catch (Exception e) {
-			// pro forma, de facto unreachable
-			e.printStackTrace();
-		}
+		datePostedFrom  = DATE_UNSET;
+		datePostedTo    = DATE_UNSET;
 		
-		nofSpltFrom = 0;
-		nofSpltTo = 0;
+		dateEnteredFrom = DATE_UNSET;
+		dateEnteredTo   = DATE_UNSET;
+		
+		nofSpltFrom = NOF_SPLT_UNSET;
+		nofSpltTo   = NOF_SPLT_UNSET;
 
 		descrPart = "";
 		
@@ -67,16 +70,14 @@ public class TransactionFilter {
 	public void reset() {
 		// type = null;
 		
-		try {
-			datePostedFrom = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
-			datePostedTo = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
-		} catch (Exception e) {
-			// pro forma, de facto unreachable
-			e.printStackTrace();
-		}
+		datePostedFrom  = DATE_UNSET;
+		datePostedTo    = DATE_UNSET;
 		
-		nofSpltFrom = 0;
-		nofSpltTo = 0;
+		dateEnteredFrom = DATE_UNSET;
+		dateEnteredTo   = DATE_UNSET;
+		
+		nofSpltFrom = NOF_SPLT_UNSET;
+		nofSpltTo   = NOF_SPLT_UNSET;
 
 		descrPart = "";
 		
@@ -88,6 +89,13 @@ public class TransactionFilter {
 	// ---------------------------------------------------------------
 	
 	public boolean matchesCriteria(final GnuCashTransaction trx,
+								   final boolean withSplits,
+								   final SplitLogic splitLogic) {
+		return matchesCriteria(trx, true, withSplits, splitLogic);
+	}
+
+	public boolean matchesCriteria(final GnuCashTransaction trx,
+								   final boolean datePostedAlreadyFiltered,
 			                       final boolean withSplits,
 			                       final SplitLogic splitLogic) {
 		
@@ -102,35 +110,59 @@ public class TransactionFilter {
 //			}
 //		}
 
-		if ( isDatePostedFromSet() ) {
-			if ( trx.getDatePosted().toLocalDate().isBefore(datePostedFrom) ) {
+		// ---
+		
+		if ( ! datePostedAlreadyFiltered ) {
+			if ( isDatePostedFromSet() ) {
+				if ( trx.getDatePosted().toLocalDate().isBefore(datePostedFrom) ) {
+					return false;
+				}
+			}
+		
+			if ( isDatePostedToSet() ) {
+				if ( trx.getDatePosted().toLocalDate().isAfter(datePostedTo) ) {
+					return false;
+				}
+			}
+		}
+		
+		// ---
+			
+		if ( isDateEnteredFromSet() ) {
+			if ( trx.getDateEntered().toLocalDate().isBefore(dateEnteredFrom) ) {
 				return false;
 			}
 		}
 		
-		if ( isDatePostedToSet() ) {
-			if ( trx.getDatePosted().toLocalDate().isAfter(datePostedTo) ) {
+		if ( isDateEnteredToSet() ) {
+			if ( trx.getDateEntered().toLocalDate().isAfter(dateEnteredTo) ) {
 				return false;
 			}
 		}
 			
-		if ( nofSpltFrom != 0 ) {
-			if ( trx.getSplits().size() < nofSpltFrom ) {
+		// ---
+		
+		if ( nofSpltFrom != NOF_SPLT_UNSET ) {
+			if ( trx.getSplitsCount() < nofSpltFrom ) {
 				return false;
 			}
 		}
 		
-		if ( nofSpltTo != 0 ) {
-			if ( trx.getSplits().size() > nofSpltTo ) {
+		if ( nofSpltTo != NOF_SPLT_UNSET ) {
+			if ( trx.getSplitsCount() > nofSpltTo ) {
 				return false;
 			}
 		}
+		
+		// ---
 		
 		if ( ! descrPart.trim().equals("") ) {
 			if ( ! trx.getDescription().contains(descrPart.trim()) ) {
 				return false;
 			}
 		}
+		
+		// ---------
 		
 		// 2) Split Level
 		if ( withSplits ) {
@@ -171,35 +203,37 @@ public class TransactionFilter {
 		return true; // Compiler happy
 	}
 	
-	// -----------------------------------------------------
+	// ---------------------------------------------------------------
 	// helpers
 
 	public boolean isDatePostedFromSet() {
-		try {
-			if ( datePostedFrom.equals( LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1) ) )
-				return false;
-			else			
-				return true;
-		} catch (Exception e) {
-			// pro forma, de facto unreachable
-			e.printStackTrace();
-		}
-		
-		return true; // Compiler happy
+		if ( datePostedFrom.equals(DATE_UNSET) )
+			return false;
+		else			
+			return true;
 	}
 
 	public boolean isDatePostedToSet() {
-		try {
-			if ( datePostedTo.equals( LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1) ) )
-				return false;
-			else			
-				return true;
-		} catch (Exception e) {
-			// pro forma, de facto unreachable
-			e.printStackTrace();
-		}
-		
-		return true; // Compiler happy
+		if ( datePostedTo.equals(DATE_UNSET) )
+			return false;
+		else			
+			return true;
+	}
+	
+	// ----------------------------
+
+	public boolean isDateEnteredFromSet() {
+		if ( dateEnteredFrom.equals(DATE_UNSET) )
+			return false;
+		else			
+			return true;
+	}
+
+	public boolean isDateEnteredToSet() {
+		if ( dateEnteredTo.equals(DATE_UNSET) )
+			return false;
+		else			
+			return true;
 	}
 	
 	// ---------------------------------------------------------------
@@ -207,11 +241,17 @@ public class TransactionFilter {
 	@Override
 	public String toString() {
 		return "TransactionFilter [" + 
-	              "datePostedFrom=" + datePostedFrom + ", " +
-				    "datePostedTo=" + datePostedTo + ", " +
-	                 "nofSpltFrom=" + nofSpltFrom + ", " +
-				       "nofSpltTo=" + nofSpltTo + ", " +
+	              "datePostedFrom=" + datePostedFrom  + ( isDatePostedFromSet()  ? "" : " (unset)" ) + ", " +
+				    "datePostedTo=" + datePostedTo    + ( isDatePostedToSet()    ? "" : " (unset)" ) + ", " +
+	              
+                 "dateEnteredFrom=" + dateEnteredFrom + ( isDateEnteredFromSet() ? "" : " (unset)" ) + ", " +
+                   "dateEnteredTo=" + dateEnteredTo   + ( isDateEnteredToSet()   ? "" : " (unset)" ) + ", " +
+
+	                 "nofSpltFrom=" + nofSpltFrom + ( nofSpltFrom == NOF_SPLT_UNSET ? " (unset)" : "" ) + ", " + 
+				       "nofSpltTo=" + nofSpltTo   + ( nofSpltTo   == NOF_SPLT_UNSET ? " (unset)" : "" ) + ", " +
+	                 
 	                  "descrPart='" + descrPart + "', " +
+
 				        "spltFilt=" + spltFilt + "]";
 	}
 

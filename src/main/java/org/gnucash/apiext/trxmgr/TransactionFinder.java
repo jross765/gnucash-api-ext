@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.gnucash.api.read.GnuCashFile;
 import org.gnucash.api.read.GnuCashTransaction;
-import org.gnucash.api.write.GnuCashWritableFile;
 import org.gnucash.apiext.Const;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +17,11 @@ public class TransactionFinder {
     
     // ---------------------------------------------------------------
     
-	private GnuCashWritableFile gcshFile = null;
+	private GnuCashFile gcshFile = null;
 	
     // ---------------------------------------------------------------
 	
-	public TransactionFinder(GnuCashWritableFile gcshFile) {
+	public TransactionFinder(GnuCashFile gcshFile) {
 		if ( gcshFile == null ) {
 			throw new IllegalArgumentException("null gnucash-file object given");
 		}
@@ -34,7 +34,7 @@ public class TransactionFinder {
 	// ::TODO
 	// - Have results writable?
     
-	public ArrayList<GnuCashTransaction> find(TransactionFilter flt, 
+	public ArrayList<GnuCashTransaction> find(TransactionFilter flt,
 			                                  boolean withSplits,
 			                                  TransactionFilter.SplitLogic splitLogic) {
 		if ( flt == null ) {
