@@ -21,8 +21,8 @@ public class TransactionSplitFilter {
 	
 	// ---------------------------------------------------------------
 
-	public GnuCashTransactionSplit.Action      action;
-	public GnuCashTransactionSplit.ReconStatus reconState;
+	public GnuCashTransactionSplit.Action     action;
+	public GnuCashTransactionSplit.ReconState reconState;
 	
 	public GCshAcctID          acctID;
 	
@@ -69,17 +69,17 @@ public class TransactionSplitFilter {
 	public void reset() {
 		action = null;
 		reconState = null;
-		
+
 		acctID.reset();
-		
+
 		acctType = null;
-		
+
 		valueFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
-		valueTo = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+		valueTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
 		valueAbs  = false;
 
 		quantityFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
-		quantityTo = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+		quantityTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
 		quantityAbs  = false;
 		
 		descrPart = "";
@@ -210,7 +210,7 @@ public class TransactionSplitFilter {
 	public String toString() {
 		return "TransactionSplitFilter [" + 
 	                 "action=" + action + ", " +
-		       "recon-status=" + reconState + ", " +
+		         "recon-state=" + reconState + ", " +
 
 				     "acctID=" + acctID + ", " +
 				     
