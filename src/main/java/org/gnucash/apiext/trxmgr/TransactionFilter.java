@@ -157,7 +157,11 @@ public class TransactionFilter {
 		// ---
 		
 		if ( ! descrPart.trim().equals("") ) {
-			if ( ! trx.getDescription().contains(descrPart.trim()) ) {
+			if ( trx.getDescription() != null ) {
+				if ( ! trx.getDescription().toLowerCase().contains(descrPart.trim().toLowerCase()) ) {
+					return false;
+				}
+			} else {
 				return false;
 			}
 		}

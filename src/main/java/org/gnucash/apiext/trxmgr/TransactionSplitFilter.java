@@ -12,13 +12,6 @@ import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
 public class TransactionSplitFilter {
 
-	// ::TODO
-//	public enum DebitCredit {
-//		DEBIT,
-//		CREDIT,
-//		UNDEFINED
-//	}
-	
 	// ---------------------------------------------------------------
 
 	public GnuCashTransactionSplit.Action     action;
@@ -196,7 +189,11 @@ public class TransactionSplitFilter {
 		// ---
 		
 		if ( ! descrPart.trim().equals("") ) {
-			if ( ! splt.getDescription().contains(descrPart.trim()) ) {
+			if ( splt.getDescription() != null ) {
+				if ( ! splt.getDescription().toLowerCase().contains(descrPart.trim().toLowerCase()) ) {
+					return false;
+				}
+			} else {
 				return false;
 			}
 		}
