@@ -91,19 +91,21 @@ public class TestTransactionFilter {
 		flt.datePostedTo = LocalDate.of(2023, 7, 1);
 		trx = gcshFile.getTransactionByID(TRX_1_ID);
 		
-		assertEquals(true, flt.matchesCriteria(trx, true, SplitLogic.OR));
+		// Here an in following calls:
+		// Notice the true/false combination of the second/third arg. 
+		assertEquals(true, flt.matchesCriteria(trx, false, true, SplitLogic.OR));
 		
 		flt.datePostedFrom = LocalDate.of(2023, 6, 20);
 		flt.datePostedTo = LocalDate.of(2023, 7, 1);
-		assertEquals(true, flt.matchesCriteria(trx, true, SplitLogic.OR));
+		assertEquals(true, flt.matchesCriteria(trx, false, true,  SplitLogic.OR));
 		
 		flt.datePostedFrom = LocalDate.of(2023, 7, 1);
 		flt.datePostedTo = LocalDate.of(2023, 7, 20);
-		assertEquals(true, flt.matchesCriteria(trx, true, SplitLogic.OR));
+		assertEquals(true, flt.matchesCriteria(trx, false, true,  SplitLogic.OR));
 		
 		flt.datePostedFrom = LocalDate.of(2023, 7, 20);
 		flt.datePostedTo = LocalDate.of(2023, 7, 1);
-		assertEquals(false, flt.matchesCriteria(trx, true, SplitLogic.OR));
+		assertEquals(false, flt.matchesCriteria(trx, false, true,  SplitLogic.OR));
 	}
 
 	@Test
