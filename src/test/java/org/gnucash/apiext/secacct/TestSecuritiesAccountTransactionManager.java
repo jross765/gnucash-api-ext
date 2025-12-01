@@ -21,7 +21,6 @@ import org.gnucash.api.write.GnuCashWritableTransaction;
 import org.gnucash.api.write.impl.GnuCashWritableFileImpl;
 import org.gnucash.apiext.ConstTest;
 import org.gnucash.base.basetypes.simple.GCshAcctID;
-import org.gnucash.base.basetypes.simple.GCshID;
 import org.gnucash.base.basetypes.simple.GCshTrxID;
 import org.gnucash.base.tuples.AcctIDAmountPair;
 import org.junit.Before;
@@ -132,7 +131,7 @@ public class TestSecuritiesAccountTransactionManager {
 		// System.err.println("Outfile for TestGnuCashWritableCustomerImpl.test01_1: '"
 		// + outFile.getPath() + "'");
 		outFile.delete(); // sic, the temp. file is already generated (empty),
-							// and the GnuCash file writer does not like that.
+						  // and the GnuCash file writer does not like that.
 		gcshInFile.writeFile(outFile);
 
 		test01_check_persisted(outFile);
@@ -152,6 +151,8 @@ public class TestSecuritiesAccountTransactionManager {
 									  ZoneId.ofOffset("", ZoneOffset.ofHours(1))), 
 					 trx.getDatePosted());
 		assertEquals(0, trx.getBalance().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0, trx.getBalanceRat().getNumerator().longValue());
+		assertEquals(1, trx.getBalanceRat().getDenominator().longValue());
 		assertEquals(3, trx.getSplits().size());
 		assertEquals(DESCR, trx.getDescription());
 
@@ -195,20 +196,41 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
 		assertEquals(GnuCashTransactionSplit.Action.BUY, splt1.getAction());
 		assertEquals(GnuCashTransactionSplit.Action.BUY.getLocaleString(), splt1.getActionStr());
+		// .
 		assertEquals(NOF_STOCKS.doubleValue(), splt1.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(NOF_STOCKS.longValue(), splt1.getQuantityRat().getNumerator().longValue());
+		assertEquals(1, splt1.getQuantityRat().getDenominator().longValue());
+		// .
 		assertEquals(amtNet.doubleValue(), splt1.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(3462, splt1.getValueRat().getNumerator().longValue());
+		assertEquals(1, splt1.getValueRat().getDenominator().longValue());
+		// .
 		assertEquals("", splt1.getDescription());
 
 		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID());
 		assertEquals(null, splt2.getAction());
+		// .
 		assertEquals(amtGross.copy().negate().doubleValue(), splt2.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(-69429, splt2.getQuantityRat().getNumerator().longValue());
+		assertEquals(20, splt2.getQuantityRat().getDenominator().longValue());
+		// .
 		assertEquals(amtGross.copy().negate().doubleValue(), splt2.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(-69429, splt2.getValueRat().getNumerator().longValue());
+		assertEquals(20, splt2.getValueRat().getDenominator().longValue());
+		// .
 		assertEquals("", splt2.getDescription());
 
 		assertEquals(STOCK_BUY_EXP_ACCT_1_ID, splt3.getAccountID());
 		assertEquals(null, splt3.getAction());
+		// .
 		assertEquals(STOCK_BUY_EXP_1.doubleValue(), splt3.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(189, splt3.getQuantityRat().getNumerator().longValue());
+		assertEquals(20, splt3.getQuantityRat().getDenominator().longValue());
+		// .
 		assertEquals(STOCK_BUY_EXP_1.doubleValue(), splt3.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(189, splt3.getValueRat().getNumerator().longValue());
+		assertEquals(20, splt3.getValueRat().getDenominator().longValue());
+		// .
 		assertEquals("", splt3.getDescription());
 	}
 
@@ -234,7 +256,7 @@ public class TestSecuritiesAccountTransactionManager {
 		// System.err.println("Outfile for TestGnuCashWritableCustomerImpl.test01_1: '"
 		// + outFile.getPath() + "'");
 		outFile.delete(); // sic, the temp. file is already generated (empty),
-							// and the GnuCash file writer does not like that.
+						  // and the GnuCash file writer does not like that.
 		gcshInFile.writeFile(outFile);
 
 		test02_check_persisted(outFile);
@@ -254,6 +276,8 @@ public class TestSecuritiesAccountTransactionManager {
 					 				  ZoneId.ofOffset("", ZoneOffset.ofHours(1))), 
 					 trx.getDatePosted());
 		assertEquals(0, trx.getBalance().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0, trx.getBalanceRat().getNumerator().longValue());
+		assertEquals(1, trx.getBalanceRat().getDenominator().longValue());
 		assertEquals(5, trx.getSplits().size());
 		assertEquals(DESCR, trx.getDescription());
 
@@ -315,32 +339,67 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
 		assertEquals(GnuCashTransactionSplit.Action.DIVIDEND, splt1.getAction());
 		assertEquals(GnuCashTransactionSplit.Action.DIVIDEND.getLocaleString(), splt1.getActionStr());
+		// .
 		assertEquals(0.0, splt1.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0, splt1.getQuantityRat().getNumerator().longValue());
+		assertEquals(1, splt1.getQuantityRat().getDenominator().longValue());
+		// .
 		assertEquals(0.0, splt1.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0, splt1.getValueRat().getNumerator().longValue());
+		assertEquals(1, splt1.getValueRat().getDenominator().longValue());
+		// .
 		assertEquals("", splt1.getDescription());
 
 		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID());
 		assertEquals(null, splt2.getAction());
+		// .
 		assertEquals(divNet.doubleValue(), splt2.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(3159, splt2.getQuantityRat().getNumerator().longValue());
+		assertEquals(40, splt2.getQuantityRat().getDenominator().longValue());
+		// .
 		assertEquals(divNet.doubleValue(), splt2.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(3159, splt2.getValueRat().getNumerator().longValue());
+		assertEquals(40, splt2.getValueRat().getDenominator().longValue());
+		// .
 		assertEquals("", splt2.getDescription());
 
 		assertEquals(INCOME_ACCT_ID, splt3.getAccountID());
 		assertEquals(null, splt3.getAction());
+		// .
 		assertEquals(DIV_GROSS.copy().negate().doubleValue(), splt3.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(-11223, splt3.getQuantityRat().getNumerator().longValue());
+		assertEquals(100, splt3.getQuantityRat().getDenominator().longValue());
+		// .
 		assertEquals(DIV_GROSS.copy().negate().doubleValue(), splt3.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(-11223, splt3.getValueRat().getNumerator().longValue());
+		assertEquals(100, splt3.getValueRat().getDenominator().longValue());
+		// .
 		assertEquals("", splt3.getDescription());
 
 		assertEquals(DIVIDEND_EXP_ACCT_1_ID, splt4.getAccountID());
 		assertEquals(null, splt4.getAction());
+		// .
 		assertEquals(DIVIDEND_EXP_1.doubleValue(), splt4.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(11223, splt4.getQuantityRat().getNumerator().longValue());
+		assertEquals(400, splt4.getQuantityRat().getDenominator().longValue());
+		// .
 		assertEquals(DIVIDEND_EXP_1.doubleValue(), splt4.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(11223, splt4.getValueRat().getNumerator().longValue());
+		assertEquals(400, splt4.getValueRat().getDenominator().longValue());
+		// .
 		assertEquals("", splt4.getDescription());
 
 		assertEquals(DIVIDEND_EXP_ACCT_2_ID, splt5.getAccountID());
 		assertEquals(null, splt5.getAction());
+		// .
 		assertEquals(DIVIDEND_EXP_2.doubleValue(), splt5.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(2079, splt5.getQuantityRat().getNumerator().longValue());
+		assertEquals(400, splt5.getQuantityRat().getDenominator().longValue());
+		// .
 		assertEquals(DIVIDEND_EXP_2.doubleValue(), splt5.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(2079, splt5.getValueRat().getNumerator().longValue());
+		assertEquals(400, splt5.getValueRat().getDenominator().longValue());
+		// .
 		assertEquals("", splt5.getDescription());
 	}
 
