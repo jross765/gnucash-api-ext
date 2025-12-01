@@ -35,11 +35,11 @@ public class WritableSecuritiesAccountManager extends SecuritiesAccountManager
     	super(gcshFile, acctID);
     	
     	if ( acctID == null ) {
-    		throw new IllegalArgumentException("null account ID given");
+    		throw new IllegalArgumentException("argument <acctID> is null");
     	}
     	
     	if ( ! acctID.isSet() ) {
-    		throw new IllegalArgumentException("unset account ID given");
+    		throw new IllegalArgumentException("argument <acctID> is not set");
     	}
     	
     	wrtblInvstAcct = gcshFile.getWritableAccountByID(acctID);
@@ -64,11 +64,11 @@ public class WritableSecuritiesAccountManager extends SecuritiesAccountManager
 		setInvstAcct(acct);
 		
     	if ( acct == null ) {
-    		throw new IllegalArgumentException("null account given");
+    		throw new IllegalArgumentException("argument <acct> is null");
     	}
     	
     	if ( acct.getType() != GnuCashAccount.Type.ASSET ) {
-    		throw new IllegalArgumentException("account is not of type '" + GnuCashAccount.Type.ASSET + "'");
+    		throw new IllegalArgumentException("argument <acct> is not of type '" + GnuCashAccount.Type.ASSET + "'");
     	}
 
 		this.wrtblInvstAcct = acct;
@@ -79,14 +79,14 @@ public class WritableSecuritiesAccountManager extends SecuritiesAccountManager
 	public GnuCashWritableAccount genShareAcct(GnuCashCommodity cmdty)
 	{
 		if ( cmdty == null )
-			throw new IllegalStateException("null commodity ID given");
+			throw new IllegalStateException("argument <cmdty> is null");
 		
 		if ( cmdty.getQualifID().getType() != GCshCmdtyCurrID.Type.SECURITY_EXCHANGE &&
 			 cmdty.getQualifID().getType() != GCshCmdtyCurrID.Type.SECURITY_MIC &&
 			 cmdty.getQualifID().getType() != GCshCmdtyCurrID.Type.SECURITY_SECIDTYPE &&
 			 cmdty.getQualifID().getType() != GCshCmdtyCurrID.Type.SECURITY_GENERAL )
 		{
-			throw new IllegalStateException("given commodity's ID has wrong type: " + cmdty.getQualifID().getType());
+			throw new IllegalStateException("argument <cmdty>'s ID has wrong type: " + cmdty.getQualifID().getType());
 		}
 		
 		GnuCashWritableAccount acct = wrtblInvstAcct.getWritableGnuCashFile().createWritableAccount();
@@ -102,17 +102,17 @@ public class WritableSecuritiesAccountManager extends SecuritiesAccountManager
 	public GnuCashWritableAccount genShareAcct(GCshCmdtyID cmdtyID)
 	{
 		if ( cmdtyID == null )
-			throw new IllegalStateException("null commodity ID given");
+			throw new IllegalStateException("argument <cmdtyID> is null");
 		
 		if ( ! cmdtyID.isSet() )
-			throw new IllegalStateException("unset commodity ID given");
+			throw new IllegalStateException("argument <cmdtyID> is not set");
 
 		if ( cmdtyID.getType() != GCshCmdtyCurrID.Type.SECURITY_EXCHANGE &&
 			 cmdtyID.getType() != GCshCmdtyCurrID.Type.SECURITY_MIC &&
 			 cmdtyID.getType() != GCshCmdtyCurrID.Type.SECURITY_SECIDTYPE &&
 			 cmdtyID.getType() != GCshCmdtyCurrID.Type.SECURITY_GENERAL )
 		{
-			throw new IllegalStateException("given commodity ID has wrong type: " + cmdtyID.getType());
+			throw new IllegalStateException("argument <cmdtyID> has wrong type: " + cmdtyID.getType());
 		}
 		
 		GnuCashCommodity cmdty = wrtblInvstAcct.getWritableGnuCashFile().getCommodityByQualifID(cmdtyID);

@@ -23,7 +23,7 @@ public class TransactionFinder {
 	
 	public TransactionFinder(GnuCashFile gcshFile) {
 		if ( gcshFile == null ) {
-			throw new IllegalArgumentException("null gnucash-file object given");
+			throw new IllegalArgumentException("argument <gcshFile> is null");
 		}
 		
 		this.gcshFile = gcshFile;
@@ -38,7 +38,7 @@ public class TransactionFinder {
 			                                  boolean withSplits,
 			                                  TransactionFilter.SplitLogic splitLogic) {
 		if ( flt == null ) {
-			throw new IllegalArgumentException("null transaction-filter given");
+			throw new IllegalArgumentException("argument <flt> is null");
 		}
 		
 		LOGGER.debug("find: Searching for Transactions matching filter: " + flt.toString());

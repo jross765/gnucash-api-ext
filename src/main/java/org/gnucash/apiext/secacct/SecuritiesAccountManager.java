@@ -27,11 +27,11 @@ public class SecuritiesAccountManager {
     
     public SecuritiesAccountManager(GnuCashFile gcshFile, GCshAcctID acctID) {
     	if ( acctID == null ) {
-    		throw new IllegalArgumentException("null account ID given");
+    		throw new IllegalArgumentException("argument <acctID> is null");
     	}
     	
     	if ( ! acctID.isSet() ) {
-    		throw new IllegalArgumentException("unset account ID given");
+    		throw new IllegalArgumentException("argument <acctID> is not set");
     	}
     	
     	invstAcct = gcshFile.getAccountByID(acctID);
@@ -53,7 +53,7 @@ public class SecuritiesAccountManager {
 
 	public void setInvstAcct(GnuCashAccount acct) {
     	if ( acct == null ) {
-    		throw new IllegalArgumentException("null account given");
+    		throw new IllegalArgumentException("argument <acct> is null");
     	}
     	
     	if ( acct.getType() != GnuCashAccount.Type.ASSET ) {

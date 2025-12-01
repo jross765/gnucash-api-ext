@@ -21,7 +21,7 @@ public class TransactionSplitFinder {
 	
 	public TransactionSplitFinder(GnuCashFile gcshFile) {
 		if ( gcshFile == null ) {
-			throw new IllegalArgumentException("null gnucash-file object given");
+			throw new IllegalArgumentException("argument <gcshFile> is null");
 		}
 		
 		this.gcshFile = gcshFile;
@@ -34,7 +34,7 @@ public class TransactionSplitFinder {
     
 	public ArrayList<GnuCashTransactionSplit> find(TransactionSplitFilter flt) {
 		if ( flt == null ) {
-			throw new IllegalArgumentException("null transaction-split-filter given");
+			throw new IllegalArgumentException("argument <flt> is null");
 		}
 		
 		LOGGER.debug("find: Searching for Transaction-Splits matching filter: " + flt.toString());
