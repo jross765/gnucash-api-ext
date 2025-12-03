@@ -150,9 +150,12 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(ZonedDateTime.of(LocalDateTime.of(DATE_POSTED, LocalTime.MIDNIGHT), 
 									  ZoneId.ofOffset("", ZoneOffset.ofHours(1))), 
 					 trx.getDatePosted());
-		assertEquals(0, trx.getBalance().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		// .
+		assertEquals(0.0, trx.getBalance().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0.0, trx.getBalanceRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(0, trx.getBalanceRat().getNumerator().longValue());
 		assertEquals(1, trx.getBalanceRat().getDenominator().longValue());
+		// .
 		assertEquals(3, trx.getSplits().size());
 		assertEquals(DESCR, trx.getDescription());
 
@@ -198,10 +201,12 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(GnuCashTransactionSplit.Action.BUY.getLocaleString(), splt1.getActionStr());
 		// .
 		assertEquals(NOF_STOCKS.doubleValue(), splt1.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(NOF_STOCKS.doubleValue(), splt1.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(NOF_STOCKS.longValue(), splt1.getQuantityRat().getNumerator().longValue());
 		assertEquals(1, splt1.getQuantityRat().getDenominator().longValue());
 		// .
 		assertEquals(amtNet.doubleValue(), splt1.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(amtNet.doubleValue(), splt1.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(3462, splt1.getValueRat().getNumerator().longValue());
 		assertEquals(1, splt1.getValueRat().getDenominator().longValue());
 		// .
@@ -211,10 +216,12 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(null, splt2.getAction());
 		// .
 		assertEquals(amtGross.copy().negate().doubleValue(), splt2.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(amtGross.copy().negate().doubleValue(), splt2.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(-69429, splt2.getQuantityRat().getNumerator().longValue());
 		assertEquals(20, splt2.getQuantityRat().getDenominator().longValue());
 		// .
 		assertEquals(amtGross.copy().negate().doubleValue(), splt2.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(amtGross.copy().negate().doubleValue(), splt2.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(-69429, splt2.getValueRat().getNumerator().longValue());
 		assertEquals(20, splt2.getValueRat().getDenominator().longValue());
 		// .
@@ -224,10 +231,12 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(null, splt3.getAction());
 		// .
 		assertEquals(STOCK_BUY_EXP_1.doubleValue(), splt3.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(STOCK_BUY_EXP_1.doubleValue(), splt3.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(189, splt3.getQuantityRat().getNumerator().longValue());
 		assertEquals(20, splt3.getQuantityRat().getDenominator().longValue());
 		// .
 		assertEquals(STOCK_BUY_EXP_1.doubleValue(), splt3.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(STOCK_BUY_EXP_1.doubleValue(), splt3.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(189, splt3.getValueRat().getNumerator().longValue());
 		assertEquals(20, splt3.getValueRat().getDenominator().longValue());
 		// .
@@ -275,9 +284,12 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(ZonedDateTime.of(LocalDateTime.of(DATE_POSTED, LocalTime.MIDNIGHT), 
 					 				  ZoneId.ofOffset("", ZoneOffset.ofHours(1))), 
 					 trx.getDatePosted());
-		assertEquals(0, trx.getBalance().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		// .
+		assertEquals(0.0, trx.getBalance().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0.0, trx.getBalanceRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(0, trx.getBalanceRat().getNumerator().longValue());
 		assertEquals(1, trx.getBalanceRat().getDenominator().longValue());
+		// .
 		assertEquals(5, trx.getSplits().size());
 		assertEquals(DESCR, trx.getDescription());
 
@@ -341,10 +353,12 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(GnuCashTransactionSplit.Action.DIVIDEND.getLocaleString(), splt1.getActionStr());
 		// .
 		assertEquals(0.0, splt1.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0.0, splt1.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(0, splt1.getQuantityRat().getNumerator().longValue());
 		assertEquals(1, splt1.getQuantityRat().getDenominator().longValue());
 		// .
 		assertEquals(0.0, splt1.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0.0, splt1.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(0, splt1.getValueRat().getNumerator().longValue());
 		assertEquals(1, splt1.getValueRat().getDenominator().longValue());
 		// .
@@ -354,10 +368,12 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(null, splt2.getAction());
 		// .
 		assertEquals(divNet.doubleValue(), splt2.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(divNet.doubleValue(), splt2.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(3159, splt2.getQuantityRat().getNumerator().longValue());
 		assertEquals(40, splt2.getQuantityRat().getDenominator().longValue());
 		// .
 		assertEquals(divNet.doubleValue(), splt2.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(divNet.doubleValue(), splt2.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(3159, splt2.getValueRat().getNumerator().longValue());
 		assertEquals(40, splt2.getValueRat().getDenominator().longValue());
 		// .
@@ -367,10 +383,12 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(null, splt3.getAction());
 		// .
 		assertEquals(DIV_GROSS.copy().negate().doubleValue(), splt3.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIV_GROSS.copy().negate().doubleValue(), splt3.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(-11223, splt3.getQuantityRat().getNumerator().longValue());
 		assertEquals(100, splt3.getQuantityRat().getDenominator().longValue());
 		// .
 		assertEquals(DIV_GROSS.copy().negate().doubleValue(), splt3.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIV_GROSS.copy().negate().doubleValue(), splt3.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(-11223, splt3.getValueRat().getNumerator().longValue());
 		assertEquals(100, splt3.getValueRat().getDenominator().longValue());
 		// .
@@ -380,10 +398,12 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(null, splt4.getAction());
 		// .
 		assertEquals(DIVIDEND_EXP_1.doubleValue(), splt4.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIVIDEND_EXP_1.doubleValue(), splt4.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(11223, splt4.getQuantityRat().getNumerator().longValue());
 		assertEquals(400, splt4.getQuantityRat().getDenominator().longValue());
 		// .
 		assertEquals(DIVIDEND_EXP_1.doubleValue(), splt4.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIVIDEND_EXP_1.doubleValue(), splt4.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(11223, splt4.getValueRat().getNumerator().longValue());
 		assertEquals(400, splt4.getValueRat().getDenominator().longValue());
 		// .
@@ -393,10 +413,12 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(null, splt5.getAction());
 		// .
 		assertEquals(DIVIDEND_EXP_2.doubleValue(), splt5.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIVIDEND_EXP_2.doubleValue(), splt5.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(2079, splt5.getQuantityRat().getNumerator().longValue());
 		assertEquals(400, splt5.getQuantityRat().getDenominator().longValue());
 		// .
 		assertEquals(DIVIDEND_EXP_2.doubleValue(), splt5.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIVIDEND_EXP_2.doubleValue(), splt5.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(2079, splt5.getValueRat().getNumerator().longValue());
 		assertEquals(400, splt5.getValueRat().getDenominator().longValue());
 		// .
