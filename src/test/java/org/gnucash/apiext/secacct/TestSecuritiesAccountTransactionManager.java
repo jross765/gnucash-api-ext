@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 import java.io.File;
-import java.io.InputStream;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -89,16 +89,18 @@ public class TestSecuritiesAccountTransactionManager {
 		ClassLoader classLoader = getClass().getClassLoader();
 		// URL gcshFileURL = classLoader.getResource(Const.GCSH_FILENAME);
 		// System.err.println("GnuCash test file resource: '" + gcshFileURL + "'");
-		InputStream gcshInFileStream = null;
+		URL gcshInFileURL = null;
+		File gcshInFileRaw = null;
 		try {
-			gcshInFileStream = classLoader.getResourceAsStream(ConstTest.GCSH_FILENAME_IN);
+			gcshInFileURL = classLoader.getResource(ConstTest.GCSH_FILENAME);
+			gcshInFileRaw = new File(gcshInFileURL.getFile());
 		} catch (Exception exc) {
 			System.err.println("Cannot generate input stream from resource");
 			return;
 		}
 
 		try {
-			gcshInFile = new GnuCashWritableFileImpl(gcshInFileStream);
+			gcshInFile = new GnuCashWritableFileImpl(gcshInFileRaw);
 		} catch (Exception exc) {
 			System.err.println("Cannot parse GnuCash in-file");
 			exc.printStackTrace();
@@ -108,6 +110,8 @@ public class TestSecuritiesAccountTransactionManager {
 		
 		newTrxID = new GCshTrxID();
 	}
+
+	// -----------------------------------------------------------------
 
 	@Test
 	public void test01() throws Exception {

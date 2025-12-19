@@ -2,7 +2,8 @@ package org.gnucash.apiext.trxmgr;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.InputStream;
+import java.io.File;
+import java.net.URL;
 
 import org.gnucash.api.read.GnuCashFile;
 import org.gnucash.api.read.GnuCashTransactionSplit;
@@ -49,16 +50,18 @@ public class TestTransactionSplitFilter {
 		ClassLoader classLoader = getClass().getClassLoader();
 		// URL gcshFileURL = classLoader.getResource(Const.GCSH_FILENAME);
 		// System.err.println("GnuCash test file resource: '" + gcshFileURL + "'");
-		InputStream gcshFileStream = null;
+		URL gcshFileURL = null;
+		File gcshFileRaw = null;
 		try {
-			gcshFileStream = classLoader.getResourceAsStream(ConstTest.GCSH_FILENAME);
+			gcshFileURL = classLoader.getResource(ConstTest.GCSH_FILENAME);
+			gcshFileRaw = new File(gcshFileURL.getFile());
 		} catch (Exception exc) {
 			System.err.println("Cannot generate input stream from resource");
 			return;
 		}
 
 		try {
-			gcshFile = new GnuCashFileImpl(gcshFileStream);
+			gcshFile = new GnuCashFileImpl(gcshFileRaw);
 		} catch (Exception exc) {
 			System.err.println("Cannot parse GnuCash file");
 			exc.printStackTrace();

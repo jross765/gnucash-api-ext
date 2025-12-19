@@ -3,7 +3,8 @@ package org.gnucash.apiext.secacct;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import java.io.InputStream;
+import java.io.File;
+import java.net.URL;
 
 import org.gnucash.api.read.GnuCashAccount;
 import org.gnucash.api.write.impl.GnuCashWritableFileImpl;
@@ -45,21 +46,25 @@ public class TestSecuritiesAccountLotManager {
 		ClassLoader classLoader = getClass().getClassLoader();
 		// URL gcshFileURL = classLoader.getResource(Const.GCSH_FILENAME);
 		// System.err.println("GnuCash test file resource: '" + gcshFileURL + "'");
-		InputStream gcshInFileStream = null;
+		URL gcshInFileURL = null;
+		File gcshInFileRaw = null;
 		try {
-			gcshInFileStream = classLoader.getResourceAsStream(ConstTest.GCSH_FILENAME_IN);
+			gcshInFileURL = classLoader.getResource(ConstTest.GCSH_FILENAME);
+			gcshInFileRaw = new File(gcshInFileURL.getFile());
 		} catch (Exception exc) {
 			System.err.println("Cannot generate input stream from resource");
 			return;
 		}
 
 		try {
-			gcshInFile = new GnuCashWritableFileImpl(gcshInFileStream);
+			gcshInFile = new GnuCashWritableFileImpl(gcshInFileRaw);
 		} catch (Exception exc) {
 			System.err.println("Cannot parse GnuCash in-file");
 			exc.printStackTrace();
 		}
 	}
+
+	// -----------------------------------------------------------------
 
 	@Test
 	public void test01() throws Exception {
