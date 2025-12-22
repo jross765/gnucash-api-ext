@@ -118,6 +118,16 @@ public class SecuritiesAccountTransactionManager {
     		final String descr) {
     	Collection<AcctIDAmountPair> expensesAcctAmtList = new ArrayList<AcctIDAmountPair>();
 	
+    	if ( taxesFees == null ) {
+    	    throw new IllegalArgumentException("argument <taxesFees> is null");
+    	}
+
+    	// CAUTION: The following two: In fact, this can happen
+    	// (negative booking after cancellation / Stornobuchung)
+	// if ( taxesFees.doubleValue() <= 0.0 ) {
+	//   throw new IllegalArgumentException("argument <taxesFees> has value <= 0.0");
+	// }
+
     	AcctIDAmountPair newPair = new AcctIDAmountPair(taxFeeAcctID, taxesFees);
     	expensesAcctAmtList.add(newPair);
     	
@@ -182,10 +192,10 @@ public class SecuritiesAccountTransactionManager {
 			
     	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
-    			throw new IllegalArgumentException("element in argument <expensesAcctAmtList> is null");
+    			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
     		}
     		if ( ! elt.isSet() ) {
-    			throw new IllegalArgumentException("element in argument <expensesAcctAmtList> is not set");
+    			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is not set");
     		}
     	}
 
@@ -195,16 +205,16 @@ public class SecuritiesAccountTransactionManager {
     	}
 		
     	if ( nofStocks.doubleValue() <= 0.0 ) {
-    		throw new IllegalArgumentException("argument <nofStocks> must be > 0");
+    		throw new IllegalArgumentException("argument <nofStocks> is <= 0");
     	}
 			
     	if ( stockPrc.doubleValue() <= 0.0 ) {
-    		throw new IllegalArgumentException("argument <stockPrc> must be > 0");
+    		throw new IllegalArgumentException("argument <stockPrc> is <= 0");
     	}
 	
     	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
     		if ( elt.amount().doubleValue() <= 0.0 ) {
-    			throw new IllegalArgumentException("element in argument <expensesAcctAmtList> is <= 0.0 given");
+    			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is <= 0.0");
     		}
     	}
 
@@ -324,13 +334,23 @@ public class SecuritiesAccountTransactionManager {
     	    final String descr) {
     	Collection<AcctIDAmountPair> expensesAcctAmtList = new ArrayList<AcctIDAmountPair>();
 	
+    	if ( taxesFees == null ) {
+    	    throw new IllegalArgumentException("argument <taxesFees> is null");
+    	}
+
+    	// CAUTION: The following two: In fact, this can happen
+    	// (negative booking after cancellation / Stornobuchung)
+	// if ( taxesFees.doubleValue() <= 0.0 ) {
+	//   throw new IllegalArgumentException("argument <taxesFees> has value <= 0.0");
+	// }
+
     	AcctIDAmountPair newPair = new AcctIDAmountPair(taxFeeAcctID, taxesFees);
     	expensesAcctAmtList.add(newPair);
 
     	return genDividDistribTrx(gcshFile,
-    			      stockAcctID, incomeAcctID, expensesAcctAmtList, offsetAcctID, 
-    			      spltAct, divDistrGross,
-    			      postDate, descr);
+    				stockAcctID, incomeAcctID, expensesAcctAmtList, offsetAcctID, 
+    				spltAct, divDistrGross,
+    				postDate, descr);
     }
     
     /**
@@ -366,23 +386,23 @@ public class SecuritiesAccountTransactionManager {
     	    final LocalDate postDate,
     	    final String descr) {
     	if ( gcshFile == null ) {
-    	    throw new IllegalArgumentException("argument <gcshFile> is null");
+    		throw new IllegalArgumentException("argument <gcshFile> is null");
     	}
 
     	if ( stockAcctID == null ||
     	     incomeAcctID == null ||
     	     offsetAcctID == null ) {
-    	    throw new IllegalArgumentException("argument <stockAcctID> or <incomeAcctID> or <offsetAcctID> is null");
+    		throw new IllegalArgumentException("argument <stockAcctID> or <incomeAcctID> or <offsetAcctID> is null");
     	}
 
     	if ( ! ( stockAcctID.isSet() ) ||
     	     ! ( incomeAcctID.isSet() ) ||
     	     ! ( offsetAcctID.isSet() ) ) {
-    	    throw new IllegalArgumentException("argument <stockAcctID> or <incomeAcctID> or <offsetAcctID> is not set");
+    		throw new IllegalArgumentException("argument <stockAcctID> or <incomeAcctID> or <offsetAcctID> is not set");
     	}
 
     	if ( expensesAcctAmtList == null ) {
-    	    throw new IllegalArgumentException("argument <expensesAcctAmtList> is null");
+    		throw new IllegalArgumentException("argument <expensesAcctAmtList> is null");
     	}
 
     	// CAUTION: Yes, this actually happens in real life, e.g. with specifics 
@@ -393,34 +413,40 @@ public class SecuritiesAccountTransactionManager {
 //    	}
     			
     	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
-    	    if ( ! elt.isNotNull() ) {
-    		throw new IllegalArgumentException("element in argument <expensesAcctAmtList> is null");
-    	    }
-    	    if ( ! elt.isSet() ) {
-    		throw new IllegalArgumentException("element in argument <expensesAcctAmtList> is not set");
-    	    }
+    		if ( ! elt.isNotNull() ) {
+			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
+    		}
+    		if ( ! elt.isSet() ) {
+    			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is not set");
+    		}
     	}
 
     	if ( divDistrGross == null ) {
-    	    throw new IllegalArgumentException("argument <divDistrGross> is null");
+    		throw new IllegalArgumentException("argument <divDistrGross> is null");
     	}
 
-    	// CAUTION: The following two: In fact, this can happen
-    	// (negative booking after cancellation / Stornobuchung)
-//    	if ( divGross.doubleValue() <= 0.0 ) {
-//    	    throw new IllegalArgumentException("gross dividend <= 0.0 given");
-//    	}
-//    				
-//    	if ( taxes.doubleValue() <= 0.0 ) {
-//    	    throw new IllegalArgumentException("taxes <= 0.0 given");
-//    	}
-    				
+	// CAUTION: The following two: In fact, this can happen
+	// (negative booking after cancellation / Stornobuchung)
+	// if ( divDistrGross.doubleValue() <= 0.0 ) {
+	//   throw new IllegalArgumentException("argument <divDistrGross> has value <= 0.0");
+	// }
+	// Instead:
+	if ( divDistrGross.doubleValue() == 0.0 ) {
+		throw new IllegalArgumentException("argument <divDistrGross> has value = 0.0");
+	}
+
+//	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+//	    if ( elt.amount().doubleValue() <= 0.0 ) {
+//		throw new IllegalArgumentException("expense <= 0.0 given");
+//	    }
+//	}
+
     	LOGGER.debug("genDividDistribTrx: Account 1 name (stock):      '" + gcshFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
     	LOGGER.debug("genDividDistribTrx: Account 2 name (income):     '" + gcshFile.getAccountByID(incomeAcctID).getQualifiedName() + "'");
     	int counter = 1;
     	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
-    	    LOGGER.debug("genDividDistribTrx: Account 3." + counter + " name (expenses): '" + gcshFile.getAccountByID(elt.accountID()).getQualifiedName() + "'");
-    	    counter++;
+    		LOGGER.debug("genDividDistribTrx: Account 3." + counter + " name (expenses): '" + gcshFile.getAccountByID(elt.accountID()).getQualifiedName() + "'");
+    		counter++;
     	}
     	LOGGER.debug("genDividDistribTrx: Account 4 name (offsetting): '" + gcshFile.getAccountByID(offsetAcctID).getQualifiedName() + "'");
 
@@ -428,31 +454,31 @@ public class SecuritiesAccountTransactionManager {
     	// Check account types
     	GnuCashAccount stockAcct  = gcshFile.getAccountByID(stockAcctID);
     	if ( stockAcct.getType() != GnuCashAccount.Type.STOCK ) {
-    	    throw new IllegalArgumentException("Account with ID " + stockAcctID + " is not of type " + GnuCashAccount.Type.STOCK);
+    		throw new IllegalArgumentException("Account with ID " + stockAcctID + " is not of type " + GnuCashAccount.Type.STOCK);
     	}
 
     	GnuCashAccount incomeAcct = gcshFile.getAccountByID(incomeAcctID);
     	if ( incomeAcct.getType() != GnuCashAccount.Type.INCOME ) {
-    	    throw new IllegalArgumentException("Account with ID " + incomeAcct + " is not of type " + GnuCashAccount.Type.INCOME);
+    		throw new IllegalArgumentException("Account with ID " + incomeAcct + " is not of type " + GnuCashAccount.Type.INCOME);
     	}
 
     	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
     		GnuCashAccount expensesAcct = gcshFile.getAccountByID(elt.accountID());
-    	    if ( expensesAcct.getType() != GnuCashAccount.Type.EXPENSE ) {
-    		throw new IllegalArgumentException("Account with ID " + elt.accountID() + " is not of type " + GnuCashAccount.Type.EXPENSE);
-    	    }
+    		if ( expensesAcct.getType() != GnuCashAccount.Type.EXPENSE ) {
+    			throw new IllegalArgumentException("Account with ID " + elt.accountID() + " is not of type " + GnuCashAccount.Type.EXPENSE);
+    		}
     	}
-    	
+	
     	GnuCashAccount offsetAcct = gcshFile.getAccountByID(offsetAcctID);
     	if ( offsetAcct.getType() != GnuCashAccount.Type.BANK ) {
-    	    throw new IllegalArgumentException("Account with ID " + offsetAcctID + " is not of type " + GnuCashAccount.Type.BANK);
+    		throw new IllegalArgumentException("Account with ID " + offsetAcctID + " is not of type " + GnuCashAccount.Type.BANK);
     	}
 
     	// ---
 
     	FixedPointNumber expensesSum = new FixedPointNumber();
     	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
-    	    expensesSum.add(elt.amount());
+    		expensesSum.add(elt.amount());
     	}
     	LOGGER.debug("genDividDistribTrx: Sum of all expenses: " + expensesSum);
 
@@ -465,7 +491,7 @@ public class SecuritiesAccountTransactionManager {
     	trx.setDescription(descr);
 
     	// ---
-    	
+
     	GnuCashWritableTransactionSplit splt1 = trx.createWritableSplit(stockAcct);
     	splt1.setValue(new FixedPointNumber());
     	splt1.setQuantity(new FixedPointNumber());
@@ -490,12 +516,12 @@ public class SecuritiesAccountTransactionManager {
 
     	counter = 1;
     	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
-    	    GnuCashAccount expensesAcct = gcshFile.getAccountByID(elt.accountID());
-    	    GnuCashWritableTransactionSplit splt4 = trx.createWritableSplit(expensesAcct);
-    	    splt4.setValue(elt.amount());
-    	    splt4.setQuantity(elt.amount());
-    	    LOGGER.debug("genDividDistribTrx: Split 4." + counter + " to write: " + splt4.toString());
-    	    counter++;
+    		GnuCashAccount expensesAcct = gcshFile.getAccountByID(elt.accountID());
+    		GnuCashWritableTransactionSplit splt4 = trx.createWritableSplit(expensesAcct);
+    		splt4.setValue(elt.amount());
+    		splt4.setQuantity(elt.amount());
+    		LOGGER.debug("genDividDistribTrx: Split 4." + counter + " to write: " + splt4.toString());
+    		counter++;
     	}
 
     	// ---
@@ -539,7 +565,7 @@ public class SecuritiesAccountTransactionManager {
      * or the number 1/3 (0.333...) for a 1-for-3 reverse stock-split (the number of shares is decreased to a third).
      * 
      * <em>Caution:</em> The wording is not standardized, at least not internationally,
-     * and thus prone to misunderstandings: 
+     * and thus prone to misunderstandings:
      * In english-speaking countries, people tend to say "3-for-1" ("3 new shares for 1 old share") 
      * when they mean a threefold-increase of the stocks, whereas in Germany, e.g., it tends
      * to be the other way round, i.e. "Aktiensplit 1:4" ("eine alte zu 4 neuen Aktien") is a 
@@ -587,12 +613,12 @@ public class SecuritiesAccountTransactionManager {
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
     	if ( factor.isLessThan(SPLIT_FACTOR_MIN) ) {
-    		throw new IllegalArgumentException("argument <factor> is has unplausible value (smaller than " + SPLIT_FACTOR_MIN + ")");
+    		throw new IllegalArgumentException("argument <factor> has unplausible value (smaller than " + SPLIT_FACTOR_MIN + ")");
     	}
 
     	// ::TODO: cf. above
     	if ( factor.isGreaterThan(SPLIT_FACTOR_MAX) ) {
-    		throw new IllegalArgumentException("argument <factor> is has unplausible value (greater than " + SPLIT_FACTOR_MAX + ")");
+    		throw new IllegalArgumentException("argument <factor> has unplausible value (greater than " + SPLIT_FACTOR_MAX + ")");
     	}
 
     	// ---
@@ -668,7 +694,7 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("argument <nofAddShares> is null");
     	}
 
-    	// CAUTION: Neg. no. of add. shares is allowed!
+    	// CAUTION: Neg. no. of add. shares is allowed (reverse split)!
 //    	if ( nofAddShares.isNegative() ) {
 //    		throw new IllegalArgumentException("negative no. of add. shares given");
 //    	}
@@ -726,32 +752,32 @@ public class SecuritiesAccountTransactionManager {
     	// ---
     	
     	GnuCashWritableTransaction trx = gcshFile.createWritableTransaction();
-    	trx.setDescription(descr);
+	trx.setDescription(descr);
 
-    	// ---
-    	
-    	// ::TODO ::CHECK
-    	// It seems that a slot also should be generated (by comparison
-    	// with a share split transaction generated with the GUI).
+	// ---
+	
+	// ::TODO ::CHECK
+	// It seems that a slot also should be generated (by comparison
+	// with a share split transaction generated with the GUI).
     	// However, it also seems that it's optional.
-    	
-    	// CAUTION: One single split
+
+	// CAUTION: One single split
 		GnuCashWritableTransactionSplit splt = trx.createWritableSplit(stockAcct);
     	splt.setValue(new FixedPointNumber());
     	splt.setQuantity(nofAddShares);
-    	splt.setAction(GnuCashTransactionSplit.Action.SPLIT);
-    	splt.setDescription("Generated by SecuritiesAccountTransactionManager, " + LocalDateTime.now());
-    	LOGGER.debug("genStockSplitTrx_nofShares: Split 1 to write: " + splt.toString());
+	splt.setAction(GnuCashTransactionSplit.Action.SPLIT);
+	splt.setDescription("Generated by SecuritiesAccountTransactionManager, " + LocalDateTime.now());
+	LOGGER.debug("genStockSplitTrx_nofShares: Split 1 to write: " + splt.toString());
 
-    	// ---
+	// ---
 
-    	trx.setDatePosted(postDate);
+	trx.setDatePosted(postDate);
     	trx.setDateEntered(LocalDateTime.now());
 
     	// ---
 
-    	LOGGER.info("genStockSplitTrx_factor: Generated new Transaction: " + trx.getID());
-    	return trx;
+	LOGGER.info("genStockSplitTrx_factor: Generated new Transaction: " + trx.getID());
+	return trx;
     }
     
 }
