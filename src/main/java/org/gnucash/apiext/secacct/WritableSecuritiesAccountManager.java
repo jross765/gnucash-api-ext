@@ -6,8 +6,8 @@ import org.gnucash.api.read.GnuCashAccount;
 import org.gnucash.api.read.GnuCashCommodity;
 import org.gnucash.api.write.GnuCashWritableAccount;
 import org.gnucash.api.write.GnuCashWritableFile;
-import org.gnucash.base.basetypes.complex.GCshCmdtyCurrID;
 import org.gnucash.base.basetypes.complex.GCshCmdtyID;
+import org.gnucash.base.basetypes.complex.GCshSecID;
 import org.gnucash.base.basetypes.simple.GCshAcctID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,10 +81,7 @@ public class WritableSecuritiesAccountManager extends SecuritiesAccountManager
 		if ( cmdty == null )
 			throw new IllegalStateException("argument <cmdty> is null");
 		
-		if ( cmdty.getQualifID().getType() != GCshCmdtyCurrID.Type.SECURITY_EXCHANGE &&
-			 cmdty.getQualifID().getType() != GCshCmdtyCurrID.Type.SECURITY_MIC &&
-			 cmdty.getQualifID().getType() != GCshCmdtyCurrID.Type.SECURITY_SECIDTYPE &&
-			 cmdty.getQualifID().getType() != GCshCmdtyCurrID.Type.SECURITY_GENERAL )
+		if ( cmdty.getQualifID().getType() != GCshCmdtyID.Type.SECURITY )
 		{
 			throw new IllegalStateException("argument <cmdty>'s ID has wrong type: " + cmdty.getQualifID().getType());
 		}
@@ -99,7 +96,7 @@ public class WritableSecuritiesAccountManager extends SecuritiesAccountManager
 		return acct;
 	}
 	
-	public GnuCashWritableAccount genShareAcct(GCshCmdtyID cmdtyID)
+	public GnuCashWritableAccount genShareAcct(GCshSecID cmdtyID)
 	{
 		if ( cmdtyID == null )
 			throw new IllegalStateException("argument <cmdtyID> is null");
@@ -107,10 +104,7 @@ public class WritableSecuritiesAccountManager extends SecuritiesAccountManager
 		if ( ! cmdtyID.isSet() )
 			throw new IllegalStateException("argument <cmdtyID> is not set");
 
-		if ( cmdtyID.getType() != GCshCmdtyCurrID.Type.SECURITY_EXCHANGE &&
-			 cmdtyID.getType() != GCshCmdtyCurrID.Type.SECURITY_MIC &&
-			 cmdtyID.getType() != GCshCmdtyCurrID.Type.SECURITY_SECIDTYPE &&
-			 cmdtyID.getType() != GCshCmdtyCurrID.Type.SECURITY_GENERAL )
+		if ( cmdtyID.getType() != GCshCmdtyID.Type.SECURITY)
 		{
 			throw new IllegalStateException("argument <cmdtyID> has wrong type: " + cmdtyID.getType());
 		}
