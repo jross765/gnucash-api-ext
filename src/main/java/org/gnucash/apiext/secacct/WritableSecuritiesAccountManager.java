@@ -109,7 +109,7 @@ public class WritableSecuritiesAccountManager extends SecuritiesAccountManager
 			throw new IllegalStateException("argument <cmdtyID> has wrong type: " + cmdtyID.getType());
 		}
 		
-		GnuCashCommodity cmdty = wrtblInvstAcct.getWritableGnuCashFile().getCommodityByQualifID(cmdtyID);
+		GnuCashCommodity cmdty = wrtblInvstAcct.getWritableGnuCashFile().getCommodityByID(cmdtyID);
 
 		return genShareAcct(cmdty);
 	}
