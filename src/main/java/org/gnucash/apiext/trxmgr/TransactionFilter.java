@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import org.gnucash.api.read.GnuCashTransaction;
 import org.gnucash.api.read.GnuCashTransactionSplit;
 
+import xyz.schnorxoborx.base.dateutils.LocalDateHelpers;
+
 public class TransactionFilter {
 	
 	public enum SplitLogic {
@@ -14,7 +16,7 @@ public class TransactionFilter {
 	
 	// ---------------------------------------------------------------
 
-	public static final LocalDate DATE_UNSET     = LocalDate.of(1900, 1, 1); // LocalDateHelpers.DATE_UNSET
+	public static final LocalDate DATE_UNSET     = LocalDateHelpers.DATE_UNSET;
 	public static final int       NOF_SPLT_UNSET = 0;
 	
 	// ---------------------------------------------------------------
