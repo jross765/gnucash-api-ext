@@ -17,12 +17,16 @@ import java.util.List;
 import org.gnucash.api.read.GnuCashTransaction;
 import org.gnucash.api.read.GnuCashTransactionSplit;
 import org.gnucash.api.read.impl.GnuCashFileImpl;
-import org.gnucash.api.write.GnuCashWritableTransaction;
+import org.gnucash.api.read.impl.GnuCashTransactionImpl;
 import org.gnucash.api.write.impl.GnuCashWritableFileImpl;
 import org.gnucash.apiext.ConstTest;
+import org.gnucash.apispec.read.impl.GnuCashStockBuyTransactionImpl;
+import org.gnucash.apispec.read.impl.GnuCashStockDividendTransactionImpl;
+import org.gnucash.apispec.write.GnuCashWritableStockBuyTransaction;
+import org.gnucash.apispec.write.GnuCashWritableStockDividendTransaction;
 import org.gnucash.base.basetypes.simple.GCshAcctID;
 import org.gnucash.base.basetypes.simple.GCshTrxID;
-import org.gnucash.base.tuples.AcctIDAmountPair;
+import org.gnucash.base.tuples.AcctIDAmountFPPair;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,7 +40,7 @@ public class TestSecuritiesAccountTransactionManager {
 	private static GCshAcctID STOCK_ACCT_ID  = new GCshAcctID("b3741e92e3b9475b9d5a2dc8254a8111");
 	private static GCshAcctID INCOME_ACCT_ID = new GCshAcctID("d7c384bfc136464490965f3f254313b1"); // only for dividend, not for
 																						           // buy/sell
-	private static List<AcctIDAmountPair> EXPENSES_ACCT_AMT_LIST = new ArrayList<AcctIDAmountPair>(); // only for dividend,
+	private static List<AcctIDAmountFPPair> EXPENSES_ACCT_AMT_LIST = new ArrayList<AcctIDAmountFPPair>(); // only for dividend,
 																									// not for buy/sell
 	private static GCshAcctID OFFSET_ACCT_ID = new GCshAcctID("bbf77a599bd24a3dbfec3dd1d0bb9f5c");
 
@@ -117,7 +121,7 @@ public class TestSecuritiesAccountTransactionManager {
 	public void test01() throws Exception {
 		test01_initExpAccts();
 
-		GnuCashWritableTransaction trx = 
+		GnuCashWritableStockBuyTransaction trx = 
 				SecuritiesAccountTransactionManager
 					.genBuyStockTrx(gcshInFile, 
 									STOCK_ACCT_ID, EXPENSES_ACCT_AMT_LIST, OFFSET_ACCT_ID,
@@ -144,29 +148,33 @@ public class TestSecuritiesAccountTransactionManager {
 	private void test01_check_persisted(File outFile) throws Exception {
 		gcshOutFile = new GnuCashFileImpl(outFile);
 
-		GnuCashTransaction trx = gcshOutFile.getTransactionByID(newTrxID);
-		assertNotEquals(null, trx);
+		GnuCashTransaction genTrx = gcshOutFile.getTransactionByID(newTrxID);
+		assertNotEquals(null, genTrx);
+
+		GnuCashStockBuyTransactionImpl specTrxRO = new GnuCashStockBuyTransactionImpl((GnuCashTransactionImpl) genTrx);
+		assertNotEquals(null, specTrxRO);
+		assertEquals(newTrxID, specTrxRO.getID());
 
 //		assertEquals(ZonedDateTime.of(LocalDateTime.of(DATE_POSTED, LocalTime.MIDNIGHT), ZoneId.systemDefault()), 
-//					 trx.getDatePosted());
+//					 specTrxRO.getDatePosted());
 //		assertEquals(LocalDateTime.of(DATE_POSTED, LocalTime.MIDNIGHT), 
-//					 trx.getDatePosted());
+//					 specTrxRO.getDatePosted());
 		assertEquals(ZonedDateTime.of(LocalDateTime.of(DATE_POSTED, LocalTime.MIDNIGHT), 
 									  ZoneId.ofOffset("", ZoneOffset.ofHours(1))), 
-					 trx.getDatePosted());
+					 specTrxRO.getDatePosted());
 		// .
-		assertEquals(0.0, trx.getBalance().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(0.0, trx.getBalanceRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(0, trx.getBalanceRat().getNumerator().longValue());
-		assertEquals(1, trx.getBalanceRat().getDenominator().longValue());
+		assertEquals(0.0, specTrxRO.getBalance().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0.0, specTrxRO.getBalanceRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0, specTrxRO.getBalanceRat().getNumerator().longValue());
+		assertEquals(1, specTrxRO.getBalanceRat().getDenominator().longValue());
 		// .
-		assertEquals(3, trx.getSplits().size());
-		assertEquals(DESCR, trx.getDescription());
+		assertEquals(3, specTrxRO.getSplits().size());
+		assertEquals(DESCR, specTrxRO.getDescription());
 
 		// ---
 
 		GnuCashTransactionSplit splt1 = null;
-		for ( GnuCashTransactionSplit splt : trx.getSplits() ) {
+		for ( GnuCashTransactionSplit splt : specTrxRO.getSplits() ) {
 			if ( splt.getAccountID().equals(STOCK_ACCT_ID) ) {
 				splt1 = splt;
 				break;
@@ -175,7 +183,7 @@ public class TestSecuritiesAccountTransactionManager {
 		assertNotEquals(null, splt1);
 		
 		GnuCashTransactionSplit splt2 = null;
-		for ( GnuCashTransactionSplit splt : trx.getSplits() ) {
+		for ( GnuCashTransactionSplit splt : specTrxRO.getSplits() ) {
 			if ( splt.getAccountID().equals(OFFSET_ACCT_ID) ) {
 				splt2 = splt;
 				break;
@@ -184,7 +192,7 @@ public class TestSecuritiesAccountTransactionManager {
 		assertNotEquals(null, splt2);
 		
 		GnuCashTransactionSplit splt3 = null;
-		for ( GnuCashTransactionSplit splt : trx.getSplits() ) {
+		for ( GnuCashTransactionSplit splt : specTrxRO.getSplits() ) {
 			if ( splt.getAccountID().equals(STOCK_BUY_EXP_ACCT_1_ID) ) {
 				splt3 = splt;
 				break;
@@ -196,7 +204,7 @@ public class TestSecuritiesAccountTransactionManager {
 
 		FixedPointNumber amtNet   = NOF_STOCKS.copy().multiply(STOCK_PRC);
 		FixedPointNumber amtGross = amtNet.copy();
-		for ( AcctIDAmountPair elt : EXPENSES_ACCT_AMT_LIST ) {
+		for ( AcctIDAmountFPPair elt : EXPENSES_ACCT_AMT_LIST ) {
 		    amtGross.add(elt.amount());
 		}
 		
@@ -251,7 +259,7 @@ public class TestSecuritiesAccountTransactionManager {
 	public void test02() throws Exception {
 		test02_initExpAccts();
 
-		GnuCashWritableTransaction trx = 
+		GnuCashWritableStockDividendTransaction trx = 
 				SecuritiesAccountTransactionManager
 					.genDividDistribTrx(gcshInFile, 
 									STOCK_ACCT_ID, INCOME_ACCT_ID, EXPENSES_ACCT_AMT_LIST, OFFSET_ACCT_ID,
@@ -278,29 +286,33 @@ public class TestSecuritiesAccountTransactionManager {
 	private void test02_check_persisted(File outFile) throws Exception {
 		gcshOutFile = new GnuCashFileImpl(outFile);
 
-		GnuCashTransaction trx = gcshOutFile.getTransactionByID(newTrxID);
-		assertNotEquals(null, trx);
+		GnuCashTransaction genTrx = gcshOutFile.getTransactionByID(newTrxID);
+		assertNotEquals(null, genTrx);
+
+		GnuCashStockDividendTransactionImpl specTrxRO = new GnuCashStockDividendTransactionImpl((GnuCashTransactionImpl) genTrx);
+		assertNotEquals(null, specTrxRO);
+		assertEquals(newTrxID, specTrxRO.getID());
 
 //		assertEquals(ZonedDateTime.of(LocalDateTime.of(DATE_POSTED, LocalTime.MIDNIGHT), ZoneId.systemDefault()), 
-//		 trx.getDatePosted());
+//		 specTrxRO.getDatePosted());
 //		assertEquals(LocalDateTime.of(DATE_POSTED, LocalTime.MIDNIGHT), 
-//		 trx.getDatePosted());
+//		 specTrxRO.getDatePosted());
 		assertEquals(ZonedDateTime.of(LocalDateTime.of(DATE_POSTED, LocalTime.MIDNIGHT), 
 					 				  ZoneId.ofOffset("", ZoneOffset.ofHours(1))), 
-					 trx.getDatePosted());
+					 specTrxRO.getDatePosted());
 		// .
-		assertEquals(0.0, trx.getBalance().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(0.0, trx.getBalanceRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(0, trx.getBalanceRat().getNumerator().longValue());
-		assertEquals(1, trx.getBalanceRat().getDenominator().longValue());
+		assertEquals(0.0, specTrxRO.getBalance().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0.0, specTrxRO.getBalanceRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0, specTrxRO.getBalanceRat().getNumerator().longValue());
+		assertEquals(1, specTrxRO.getBalanceRat().getDenominator().longValue());
 		// .
-		assertEquals(5, trx.getSplits().size());
-		assertEquals(DESCR, trx.getDescription());
+		assertEquals(5, specTrxRO.getSplits().size());
+		assertEquals(DESCR, specTrxRO.getDescription());
 
 		// ---
 
 		GnuCashTransactionSplit splt1 = null;
-		for ( GnuCashTransactionSplit splt : trx.getSplits() ) {
+		for ( GnuCashTransactionSplit splt : specTrxRO.getSplits() ) {
 			if ( splt.getAccountID().equals(STOCK_ACCT_ID) ) {
 				splt1 = splt;
 				break;
@@ -309,7 +321,7 @@ public class TestSecuritiesAccountTransactionManager {
 		assertNotEquals(null, splt1);
 		
 		GnuCashTransactionSplit splt2 = null;
-		for ( GnuCashTransactionSplit splt : trx.getSplits() ) {
+		for ( GnuCashTransactionSplit splt : specTrxRO.getSplits() ) {
 			if ( splt.getAccountID().equals(OFFSET_ACCT_ID) ) {
 				splt2 = splt;
 				break;
@@ -318,7 +330,7 @@ public class TestSecuritiesAccountTransactionManager {
 		assertNotEquals(null, splt2);
 		
 		GnuCashTransactionSplit splt3 = null;
-		for ( GnuCashTransactionSplit splt : trx.getSplits() ) {
+		for ( GnuCashTransactionSplit splt : specTrxRO.getSplits() ) {
 			if ( splt.getAccountID().equals(INCOME_ACCT_ID) ) {
 				splt3 = splt;
 				break;
@@ -327,7 +339,7 @@ public class TestSecuritiesAccountTransactionManager {
 		assertNotEquals(null, splt3);
 		
 		GnuCashTransactionSplit splt4 = null;
-		for ( GnuCashTransactionSplit splt : trx.getSplits() ) {
+		for ( GnuCashTransactionSplit splt : specTrxRO.getSplits() ) {
 			if ( splt.getAccountID().equals(DIVIDEND_EXP_ACCT_1_ID) ) {
 				splt4 = splt;
 				break;
@@ -336,7 +348,7 @@ public class TestSecuritiesAccountTransactionManager {
 		assertNotEquals(null, splt4);
 		
 		GnuCashTransactionSplit splt5 = null;
-		for ( GnuCashTransactionSplit splt : trx.getSplits() ) {
+		for ( GnuCashTransactionSplit splt : specTrxRO.getSplits() ) {
 			if ( splt.getAccountID().equals(DIVIDEND_EXP_ACCT_2_ID) ) {
 				splt5 = splt;
 				break;
@@ -347,7 +359,7 @@ public class TestSecuritiesAccountTransactionManager {
 		// ---
 
     	FixedPointNumber expensesSum = new FixedPointNumber();
-    	for ( AcctIDAmountPair elt : EXPENSES_ACCT_AMT_LIST ) {
+    	for ( AcctIDAmountFPPair elt : EXPENSES_ACCT_AMT_LIST ) {
     	    expensesSum.add(elt.amount());
     	}
     	FixedPointNumber divNet = DIV_GROSS.copy().subtract(expensesSum);
@@ -435,7 +447,7 @@ public class TestSecuritiesAccountTransactionManager {
 	private void test01_initExpAccts() {
 		EXPENSES_ACCT_AMT_LIST.clear();
 		
-		AcctIDAmountPair acctAmtPr1 = new AcctIDAmountPair(STOCK_BUY_EXP_ACCT_1_ID, STOCK_BUY_EXP_1);
+		AcctIDAmountFPPair acctAmtPr1 = new AcctIDAmountFPPair(STOCK_BUY_EXP_ACCT_1_ID, STOCK_BUY_EXP_1);
 		EXPENSES_ACCT_AMT_LIST.add(acctAmtPr1);
 	}
 
@@ -446,10 +458,10 @@ public class TestSecuritiesAccountTransactionManager {
 	private void test02_initExpAccts() {
 		EXPENSES_ACCT_AMT_LIST.clear();
 		
-		AcctIDAmountPair acctAmtPr1 = new AcctIDAmountPair(DIVIDEND_EXP_ACCT_1_ID, DIVIDEND_EXP_1);
+		AcctIDAmountFPPair acctAmtPr1 = new AcctIDAmountFPPair(DIVIDEND_EXP_ACCT_1_ID, DIVIDEND_EXP_1);
 		EXPENSES_ACCT_AMT_LIST.add(acctAmtPr1);
 		
-		AcctIDAmountPair acctAmtPr2 = new AcctIDAmountPair(DIVIDEND_EXP_ACCT_2_ID, DIVIDEND_EXP_2);
+		AcctIDAmountFPPair acctAmtPr2 = new AcctIDAmountFPPair(DIVIDEND_EXP_ACCT_2_ID, DIVIDEND_EXP_2);
 		EXPENSES_ACCT_AMT_LIST.add(acctAmtPr2);
 	}
 

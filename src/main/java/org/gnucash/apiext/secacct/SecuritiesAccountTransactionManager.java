@@ -11,8 +11,18 @@ import org.gnucash.api.read.GnuCashTransactionSplit;
 import org.gnucash.api.write.GnuCashWritableTransaction;
 import org.gnucash.api.write.GnuCashWritableTransactionSplit;
 import org.gnucash.api.write.impl.GnuCashWritableFileImpl;
+import org.gnucash.api.write.impl.GnuCashWritableTransactionImpl;
+import org.gnucash.apispec.read.impl.GnuCashStockBuyTransactionImpl;
+import org.gnucash.apispec.read.impl.GnuCashStockDividendTransactionImpl;
+import org.gnucash.apispec.read.impl.GnuCashStockSplitTransactionImpl;
+import org.gnucash.apispec.write.GnuCashWritableStockBuyTransaction;
+import org.gnucash.apispec.write.GnuCashWritableStockDividendTransaction;
+import org.gnucash.apispec.write.GnuCashWritableStockSplitTransaction;
+import org.gnucash.apispec.write.impl.GnuCashWritableStockBuyTransactionImpl;
+import org.gnucash.apispec.write.impl.GnuCashWritableStockDividendTransactionImpl;
+import org.gnucash.apispec.write.impl.GnuCashWritableStockSplitTransactionImpl;
 import org.gnucash.base.basetypes.simple.GCshAcctID;
-import org.gnucash.base.tuples.AcctIDAmountPair;
+import org.gnucash.base.tuples.AcctIDAmountFPPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,7 +116,7 @@ public class SecuritiesAccountTransactionManager {
      * 
      * @see #genBuyStockTrx(GnuCashWritableFileImpl, GCshAcctID, Collection, GCshAcctID, FixedPointNumber, FixedPointNumber, LocalDate, String)
      */
-    public static GnuCashWritableTransaction genBuyStockTrx(
+    public static GnuCashWritableStockBuyTransaction genBuyStockTrx(
     		final GnuCashWritableFileImpl gcshFile,
     		final GCshAcctID stockAcctID,
     		final GCshAcctID taxFeeAcctID,
@@ -116,7 +126,7 @@ public class SecuritiesAccountTransactionManager {
     		final FixedPointNumber taxesFees,
     		final LocalDate postDate,
     		final String descr) {
-    	Collection<AcctIDAmountPair> expensesAcctAmtList = new ArrayList<AcctIDAmountPair>();
+    	Collection<AcctIDAmountFPPair> expensesAcctAmtList = new ArrayList<AcctIDAmountFPPair>();
 	
     	if ( taxesFees == null ) {
     	    throw new IllegalArgumentException("argument <taxesFees> is null");
@@ -128,7 +138,7 @@ public class SecuritiesAccountTransactionManager {
 	//   throw new IllegalArgumentException("argument <taxesFees> has value <= 0.0");
 	// }
 
-    	AcctIDAmountPair newPair = new AcctIDAmountPair(taxFeeAcctID, taxesFees);
+    	AcctIDAmountFPPair newPair = new AcctIDAmountFPPair(taxFeeAcctID, taxesFees);
     	expensesAcctAmtList.add(newPair);
     	
     	return genBuyStockTrx(gcshFile, 
@@ -159,10 +169,10 @@ public class SecuritiesAccountTransactionManager {
      * 
      * @see #genBuyStockTrx(GnuCashWritableFileImpl, GCshAcctID, GCshAcctID, GCshAcctID, FixedPointNumber, FixedPointNumber, FixedPointNumber, LocalDate, String)
      */
-    public static GnuCashWritableTransaction genBuyStockTrx(
+    public static GnuCashWritableStockBuyTransaction genBuyStockTrx(
     		final GnuCashWritableFileImpl gcshFile,
     		final GCshAcctID stockAcctID,
-    		final Collection<AcctIDAmountPair> expensesAcctAmtList,
+    		final Collection<AcctIDAmountFPPair> expensesAcctAmtList,
     		final GCshAcctID offsetAcctID,
     		final FixedPointNumber nofStocks,
     		final FixedPointNumber stockPrc,
@@ -190,7 +200,7 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("argument <expensesAcctAmtList> is empty");
     	}
 			
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
     			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
     		}
@@ -212,7 +222,7 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("argument <stockPrc> is <= 0");
     	}
 	
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		if ( elt.amount().doubleValue() <= 0.0 ) {
     			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is <= 0.0");
     		}
@@ -220,7 +230,7 @@ public class SecuritiesAccountTransactionManager {
 
     	LOGGER.debug("genBuyStockTrx: Account 1 name (stock):      '" + gcshFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
     	int counter = 1;
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		LOGGER.debug("genBuyStockTrx: Account 2." + counter + " name (expenses): '" + gcshFile.getAccountByID(elt.accountID()).getQualifiedName() + "'");
     		counter++;
     	}
@@ -233,7 +243,7 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("Account with ID " + stockAcctID + " is not of type " + GnuCashAccount.Type.STOCK);
     	}
 
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		GnuCashAccount expensesAcct = gcshFile.getAccountByID(elt.accountID());
     		if ( expensesAcct.getType() != GnuCashAccount.Type.EXPENSE ) {
     			throw new IllegalArgumentException("Account with ID " + elt.accountID() + " is not of type " + GnuCashAccount.Type.EXPENSE);
@@ -251,26 +261,26 @@ public class SecuritiesAccountTransactionManager {
     	LOGGER.debug("genBuyStockTrx: Net amount: " + amtNet);
 
     	FixedPointNumber amtGross = amtNet.copy();
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		amtGross.add(elt.amount());
     	}
     	LOGGER.debug("genBuyStockTrx: Gross amount: " + amtGross);
 
     	// ---
 
-    	GnuCashWritableTransaction trx = gcshFile.createWritableTransaction();
-    	trx.setDescription(descr);
+    	GnuCashWritableTransaction genTrx = gcshFile.createWritableTransaction();
+    	genTrx.setDescription(descr);
 
     	// ---
 
-    	GnuCashWritableTransactionSplit splt1 = trx.createWritableSplit(offsetAcct);
+    	GnuCashWritableTransactionSplit splt1 = genTrx.createWritableSplit(offsetAcct);
     	splt1.setValue(amtGross.copy().negate());
     	splt1.setQuantity(amtGross.copy().negate());
     	LOGGER.debug("genBuyStockTrx: Split 1 to write: " + splt1.toString());
 
     	// ---
 	
-    	GnuCashWritableTransactionSplit splt2 = trx.createWritableSplit(stockAcct);
+    	GnuCashWritableTransactionSplit splt2 = genTrx.createWritableSplit(stockAcct);
     	splt2.setValue(amtNet);
     	splt2.setQuantity(nofStocks);
     	splt2.setAction(GnuCashTransactionSplit.Action.BUY);
@@ -279,9 +289,9 @@ public class SecuritiesAccountTransactionManager {
     	// ---
 
     	counter = 1;
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		GnuCashAccount expensesAcct = gcshFile.getAccountByID(elt.accountID());
-    		GnuCashWritableTransactionSplit splt3 = trx.createWritableSplit(expensesAcct);
+    		GnuCashWritableTransactionSplit splt3 = genTrx.createWritableSplit(expensesAcct);
     		splt3.setValue(elt.amount());
     		splt3.setQuantity(elt.amount());
     		LOGGER.debug("genBuyStockTrx: Split 3." + counter + " to write: " + splt3.toString());
@@ -290,13 +300,31 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
 
-    	trx.setDatePosted(postDate);
-    	trx.setDateEntered(LocalDateTime.now());
+    	genTrx.setDatePosted(postDate);
+    	genTrx.setDateEntered(LocalDateTime.now());
 
+    	LOGGER.info("genBuyStockTrx: Generated new (generic) Transaction: " + genTrx.getID());
+    	
     	// ---
 
-    	LOGGER.info("genBuyStockTrx: Generated new Transaction: " + trx.getID());
-    	return trx;
+		GnuCashStockBuyTransactionImpl specTrxRO = null;
+    	try {
+    		specTrxRO = new GnuCashStockBuyTransactionImpl((GnuCashWritableTransactionImpl) genTrx);
+    	} catch ( Exception exc ) {
+        	LOGGER.error("genBuyStockTrx: Could not convert generic transaction to specialized one (1): " + genTrx.getID());
+        	throw exc;
+    	}
+    	
+    	GnuCashWritableStockBuyTransaction specTrxRW = null;
+    	try {
+        	specTrxRW = new GnuCashWritableStockBuyTransactionImpl(specTrxRO);
+        	LOGGER.info("genBuyStockTrx: Generated new (specialized) Transaction: " + specTrxRW.getID());
+    	} catch ( Exception exc ) {
+        	LOGGER.error("genBuyStockTrx: Could not convert generic transaction to specialized one (2): " + genTrx.getID());
+        	throw exc;
+    	}
+    	
+    	return specTrxRW;
     }
     
     // ---------------------------------------------------------------
@@ -321,7 +349,7 @@ public class SecuritiesAccountTransactionManager {
      * @param descr description of the transaction
      * @return a newly generated, modifiable transaction object
      */
-    public static GnuCashWritableTransaction genDividDistribTrx(
+    public static GnuCashWritableStockDividendTransaction genDividDistribTrx(
     	    final GnuCashWritableFileImpl gcshFile,
     	    final GCshAcctID stockAcctID,
     	    final GCshAcctID incomeAcctID,
@@ -332,7 +360,7 @@ public class SecuritiesAccountTransactionManager {
     	    final FixedPointNumber taxesFees,
     	    final LocalDate postDate,
     	    final String descr) {
-    	Collection<AcctIDAmountPair> expensesAcctAmtList = new ArrayList<AcctIDAmountPair>();
+    	Collection<AcctIDAmountFPPair> expensesAcctAmtList = new ArrayList<AcctIDAmountFPPair>();
 	
     	if ( taxesFees == null ) {
     	    throw new IllegalArgumentException("argument <taxesFees> is null");
@@ -344,7 +372,7 @@ public class SecuritiesAccountTransactionManager {
 	//   throw new IllegalArgumentException("argument <taxesFees> has value <= 0.0");
 	// }
 
-    	AcctIDAmountPair newPair = new AcctIDAmountPair(taxFeeAcctID, taxesFees);
+    	AcctIDAmountFPPair newPair = new AcctIDAmountFPPair(taxFeeAcctID, taxesFees);
     	expensesAcctAmtList.add(newPair);
 
     	return genDividDistribTrx(gcshFile,
@@ -375,11 +403,11 @@ public class SecuritiesAccountTransactionManager {
      * @param descr description of the transaction
      * @return a newly generated, modifiable transaction object
      */
-    public static GnuCashWritableTransaction genDividDistribTrx(
+    public static GnuCashWritableStockDividendTransaction genDividDistribTrx(
     	    final GnuCashWritableFileImpl gcshFile,
     	    final GCshAcctID stockAcctID,
     	    final GCshAcctID incomeAcctID,
-    	    final Collection<AcctIDAmountPair> expensesAcctAmtList,
+    	    final Collection<AcctIDAmountFPPair> expensesAcctAmtList,
     	    final GCshAcctID offsetAcctID,
     	    final GnuCashTransactionSplit.Action spltAct,
     	    final FixedPointNumber divDistrGross,
@@ -412,7 +440,7 @@ public class SecuritiesAccountTransactionManager {
 //    	    throw new IllegalArgumentException("empty expenses account list given");
 //    	}
     			
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
 			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
     		}
@@ -425,26 +453,26 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("argument <divDistrGross> is null");
     	}
 
-	// CAUTION: The following two: In fact, this can happen
-	// (negative booking after cancellation / Stornobuchung)
-	// if ( divDistrGross.doubleValue() <= 0.0 ) {
-	//   throw new IllegalArgumentException("argument <divDistrGross> has value <= 0.0");
-	// }
-	// Instead:
-	if ( divDistrGross.doubleValue() == 0.0 ) {
-		throw new IllegalArgumentException("argument <divDistrGross> has value = 0.0");
-	}
+    	// CAUTION: The following two: In fact, this can happen
+    	// (negative booking after cancellation / Stornobuchung)
+    	// if ( divDistrGross.doubleValue() <= 0.0 ) {
+    	//   throw new IllegalArgumentException("argument <divDistrGross> has value <= 0.0");
+    	// }
+    	// Instead:
+    	if ( divDistrGross.doubleValue() == 0.0 ) {
+    		throw new IllegalArgumentException("argument <divDistrGross> has value = 0.0");
+    	}
 
-//	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
-//	    if ( elt.amount().doubleValue() <= 0.0 ) {
-//		throw new IllegalArgumentException("expense <= 0.0 given");
-//	    }
-//	}
+    	//	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	//	    if ( elt.amount().doubleValue() <= 0.0 ) {
+    	//		throw new IllegalArgumentException("expense <= 0.0 given");
+    	//	    }
+    	//	}
 
     	LOGGER.debug("genDividDistribTrx: Account 1 name (stock):      '" + gcshFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
     	LOGGER.debug("genDividDistribTrx: Account 2 name (income):     '" + gcshFile.getAccountByID(incomeAcctID).getQualifiedName() + "'");
     	int counter = 1;
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		LOGGER.debug("genDividDistribTrx: Account 3." + counter + " name (expenses): '" + gcshFile.getAccountByID(elt.accountID()).getQualifiedName() + "'");
     		counter++;
     	}
@@ -462,7 +490,7 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("Account with ID " + incomeAcct + " is not of type " + GnuCashAccount.Type.INCOME);
     	}
 
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		GnuCashAccount expensesAcct = gcshFile.getAccountByID(elt.accountID());
     		if ( expensesAcct.getType() != GnuCashAccount.Type.EXPENSE ) {
     			throw new IllegalArgumentException("Account with ID " + elt.accountID() + " is not of type " + GnuCashAccount.Type.EXPENSE);
@@ -477,7 +505,7 @@ public class SecuritiesAccountTransactionManager {
     	// ---
 
     	FixedPointNumber expensesSum = new FixedPointNumber();
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		expensesSum.add(elt.amount());
     	}
     	LOGGER.debug("genDividDistribTrx: Sum of all expenses: " + expensesSum);
@@ -487,12 +515,12 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
 
-    	GnuCashWritableTransaction trx = gcshFile.createWritableTransaction();
-    	trx.setDescription(descr);
-
+    	GnuCashWritableTransaction genTrx = gcshFile.createWritableTransaction();
+    	genTrx.setDescription(descr);
+    	
     	// ---
 
-    	GnuCashWritableTransactionSplit splt1 = trx.createWritableSplit(stockAcct);
+    	GnuCashWritableTransactionSplit splt1 = genTrx.createWritableSplit(stockAcct);
     	splt1.setValue(new FixedPointNumber());
     	splt1.setQuantity(new FixedPointNumber());
     	splt1.setAction(spltAct);
@@ -500,14 +528,14 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
 
-    	GnuCashWritableTransactionSplit splt2 = trx.createWritableSplit(offsetAcct);
+    	GnuCashWritableTransactionSplit splt2 = genTrx.createWritableSplit(offsetAcct);
     	splt2.setValue(divDistrNet);
     	splt2.setQuantity(divDistrNet);
     	LOGGER.debug("genDividDistribTrx: Split 2 to write: " + splt2.toString());
 
     	// ---
 
-    	GnuCashWritableTransactionSplit splt3 = trx.createWritableSplit(incomeAcct);
+    	GnuCashWritableTransactionSplit splt3 = genTrx.createWritableSplit(incomeAcct);
     	splt3.setValue(divDistrGross.copy().negate());
     	splt3.setQuantity(divDistrGross.copy().negate());
     	LOGGER.debug("genDividDistribTrx: Split 3 to write: " + splt3.toString());
@@ -515,9 +543,9 @@ public class SecuritiesAccountTransactionManager {
     	// ---
 
     	counter = 1;
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		GnuCashAccount expensesAcct = gcshFile.getAccountByID(elt.accountID());
-    		GnuCashWritableTransactionSplit splt4 = trx.createWritableSplit(expensesAcct);
+    		GnuCashWritableTransactionSplit splt4 = genTrx.createWritableSplit(expensesAcct);
     		splt4.setValue(elt.amount());
     		splt4.setQuantity(elt.amount());
     		LOGGER.debug("genDividDistribTrx: Split 4." + counter + " to write: " + splt4.toString());
@@ -526,18 +554,36 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
 
-    	trx.setDatePosted(postDate);
-    	trx.setDateEntered(LocalDateTime.now());
+    	genTrx.setDatePosted(postDate);
+    	genTrx.setDateEntered(LocalDateTime.now());
+
+    	LOGGER.info("genDividDistribTrx: Generated new Transaction: " + genTrx.getID());
 
     	// ---
 
-    	LOGGER.info("genDividDistribTrx: Generated new Transaction: " + trx.getID());
-    	return trx;
+		GnuCashStockDividendTransactionImpl specTrxRO = null;
+    	try {
+    		specTrxRO = new GnuCashStockDividendTransactionImpl((GnuCashWritableTransactionImpl) genTrx);
+    	} catch ( Exception exc ) {
+        	LOGGER.error("genDividDistribTrx: Could not convert generic transaction to specialized one (1): " + genTrx.getID());
+        	throw exc;
+    	}
+    	
+    	GnuCashWritableStockDividendTransaction specTrxRW = null;
+    	try {
+        	specTrxRW = new GnuCashWritableStockDividendTransactionImpl(specTrxRO);
+        	LOGGER.info("genDividDistribTrx: Generated new (specialized) Transaction: " + specTrxRW.getID());
+    	} catch ( Exception exc ) {
+        	LOGGER.error("genDividDistribTrx: Could not convert generic transaction to specialized one (2): " + genTrx.getID());
+        	throw exc;
+    	}
+    	
+    	return specTrxRW;
     }
 
     // ---------------------------------------------------------------
     
-    public static GnuCashWritableTransaction genStockSplitTrx(
+    public static GnuCashWritableStockSplitTransaction genStockSplitTrx(
     		final GnuCashWritableFileImpl gcshFile,
     		final GCshAcctID stockAcctID,
     		final StockSplitVar var,
@@ -580,7 +626,7 @@ public class SecuritiesAccountTransactionManager {
      * @see #genStockSplitTrx_nofShares(GnuCashWritableFileImpl, GCshAcctID, FixedPointNumber, LocalDate, String)
      * @see #genStockSplitTrx(GnuCashWritableFileImpl, GCshAcctID, StockSplitVar, FixedPointNumber, LocalDate, String)
      */
-    public static GnuCashWritableTransaction genStockSplitTrx_factor(
+    public static GnuCashWritableStockSplitTransaction genStockSplitTrx_factor(
     		final GnuCashWritableFileImpl gcshFile,
     		final GCshAcctID stockAcctID,
     		final FixedPointNumber factor,
@@ -606,7 +652,7 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("argument <factor> is < 0");
     	}
 
-    	if ( factor.getBigDecimal().equals(BigDecimal.ZERO) ) {
+    	if ( factor.equals(FixedPointNumber.ZERO) ) {
     		throw new IllegalArgumentException("argument <factor> is = 0");
     	}
 
@@ -637,7 +683,7 @@ public class SecuritiesAccountTransactionManager {
     	
     	FixedPointNumber nofSharesOld = stockAcct.getBalance();
     	LOGGER.debug("genStockSplitTrx_factor: Old no. of shares: " + nofSharesOld);
-    	if ( nofSharesOld.equals(BigDecimal.ZERO) ) {
+    	if ( nofSharesOld.equals(FixedPointNumber.ZERO) ) {
     		throw new IllegalStateException("No. of old shares is zero. Cannot carry out a split.");
     	}
     	FixedPointNumber nofSharesNew = nofSharesOld.copy().multiply(factor);
@@ -672,7 +718,7 @@ public class SecuritiesAccountTransactionManager {
      * @see #genStockSplitTrx_factor(GnuCashWritableFileImpl, GCshAcctID, FixedPointNumber, LocalDate, String)
      * @see #genStockSplitTrx(GnuCashWritableFileImpl, GCshAcctID, StockSplitVar, FixedPointNumber, LocalDate, String)
      */
-    public static GnuCashWritableTransaction genStockSplitTrx_nofShares(
+    public static GnuCashWritableStockSplitTransaction genStockSplitTrx_nofShares(
     	    final GnuCashWritableFileImpl gcshFile,
     	    final GCshAcctID stockAcctID,
     	    final FixedPointNumber nofAddShares, // use neg. number in case of reverse stock-split
@@ -699,7 +745,7 @@ public class SecuritiesAccountTransactionManager {
 //    		throw new IllegalArgumentException("negative no. of add. shares given");
 //    	}
 
-    	if ( nofAddShares.getBigDecimal().equals(BigDecimal.ZERO) ) {
+    	if ( nofAddShares.equals(FixedPointNumber.ZERO) ) {
     		throw new IllegalArgumentException("argument <nofAddShares> is = 0");
     	}
 
@@ -751,33 +797,53 @@ public class SecuritiesAccountTransactionManager {
     	
     	// ---
     	
-    	GnuCashWritableTransaction trx = gcshFile.createWritableTransaction();
-	trx.setDescription(descr);
+    	GnuCashWritableTransaction genTrx = gcshFile.createWritableTransaction();
+    	genTrx.setDescription(descr);
 
-	// ---
+    	// ---
 	
-	// ::TODO ::CHECK
-	// It seems that a slot also should be generated (by comparison
-	// with a share split transaction generated with the GUI).
+    	// ::TODO ::CHECK
+    	// It seems that a slot also should be generated (by comparison
+    	// with a share split transaction generated with the GUI).
     	// However, it also seems that it's optional.
 
-	// CAUTION: One single split
-		GnuCashWritableTransactionSplit splt = trx.createWritableSplit(stockAcct);
+    	// CAUTION: One single split
+		GnuCashWritableTransactionSplit splt = genTrx.createWritableSplit(stockAcct);
     	splt.setValue(new FixedPointNumber());
     	splt.setQuantity(nofAddShares);
-	splt.setAction(GnuCashTransactionSplit.Action.SPLIT);
-	splt.setDescription("Generated by SecuritiesAccountTransactionManager, " + LocalDateTime.now());
-	LOGGER.debug("genStockSplitTrx_nofShares: Split 1 to write: " + splt.toString());
-
-	// ---
-
-	trx.setDatePosted(postDate);
-    	trx.setDateEntered(LocalDateTime.now());
+    	splt.setAction(GnuCashTransactionSplit.Action.SPLIT);
+    	splt.setDescription("Generated by SecuritiesAccountTransactionManager, " + LocalDateTime.now());
+    	LOGGER.debug("genStockSplitTrx_nofShares: Split 1 to write: " + splt.toString());
 
     	// ---
 
-	LOGGER.info("genStockSplitTrx_factor: Generated new Transaction: " + trx.getID());
-	return trx;
+    	genTrx.setDatePosted(postDate);
+    	genTrx.setDateEntered(LocalDateTime.now());
+
+    	// ---
+
+    	LOGGER.info("genStockSplitTrx_factor: Generated new Transaction: " + genTrx.getID());
+
+    	// ---
+
+		GnuCashStockSplitTransactionImpl specTrxRO = null;
+    	try {
+    		specTrxRO = new GnuCashStockSplitTransactionImpl((GnuCashWritableTransactionImpl) genTrx);
+    	} catch ( Exception exc ) {
+        	LOGGER.error("genStockSplitTrx_factor: Could not convert generic transaction to specialized one (1): " + genTrx.getID());
+        	throw exc;
+    	}
+    	
+    	GnuCashWritableStockSplitTransaction specTrxRW = null;
+    	try {
+        	specTrxRW = new GnuCashWritableStockSplitTransactionImpl(specTrxRO);
+        	LOGGER.info("genStockSplitTrx_factor: Generated new (specialized) Transaction: " + specTrxRW.getID());
+    	} catch ( Exception exc ) {
+        	LOGGER.error("genStockSplitTrx_factor: Could not convert generic transaction to specialized one (2): " + genTrx.getID());
+        	throw exc;
+    	}
+    	
+    	return specTrxRW;
     }
     
 }
