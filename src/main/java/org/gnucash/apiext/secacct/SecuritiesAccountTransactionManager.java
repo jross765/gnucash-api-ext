@@ -557,7 +557,7 @@ public class SecuritiesAccountTransactionManager {
     	genTrx.setDatePosted(postDate);
     	genTrx.setDateEntered(LocalDateTime.now());
 
-    	LOGGER.info("genDividDistribTrx: Generated new Transaction: " + genTrx.getID());
+    	LOGGER.info("genDividDistribTrx: Generated new (generic) Transaction: " + genTrx.getID());
 
     	// ---
 
@@ -681,7 +681,7 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
     	
-    	FixedPointNumber nofSharesOld = stockAcct.getBalance();
+    	FixedPointNumber nofSharesOld = stockAcct.getBalance(postDate);
     	LOGGER.debug("genStockSplitTrx_factor: Old no. of shares: " + nofSharesOld);
     	if ( nofSharesOld.equals(FixedPointNumber.ZERO) ) {
     		throw new IllegalStateException("No. of old shares is zero. Cannot carry out a split.");
@@ -785,7 +785,7 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
     	
-    	FixedPointNumber nofSharesOld = stockAcct.getBalance();
+    	FixedPointNumber nofSharesOld = stockAcct.getBalance(postDate);
     	LOGGER.debug("genStockSplitTrx_nofShares: Old no. of shares: " + nofSharesOld);
     	if ( nofSharesOld.equals(BigDecimal.ZERO) ) {
     		throw new IllegalStateException("No. of old shares is zero. Cannot carry out a split.");
@@ -820,9 +820,7 @@ public class SecuritiesAccountTransactionManager {
     	genTrx.setDatePosted(postDate);
     	genTrx.setDateEntered(LocalDateTime.now());
 
-    	// ---
-
-    	LOGGER.info("genStockSplitTrx_factor: Generated new Transaction: " + genTrx.getID());
+    	LOGGER.info("genStockSplitTrx_factor: Generated new (generic) Transaction: " + genTrx.getID());
 
     	// ---
 

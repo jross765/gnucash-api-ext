@@ -14,16 +14,23 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.numbers.fraction.BigFraction;
+import org.gnucash.api.read.GnuCashAccount;
 import org.gnucash.api.read.GnuCashTransaction;
 import org.gnucash.api.read.GnuCashTransactionSplit;
 import org.gnucash.api.read.impl.GnuCashFileImpl;
 import org.gnucash.api.read.impl.GnuCashTransactionImpl;
 import org.gnucash.api.write.impl.GnuCashWritableFileImpl;
 import org.gnucash.apiext.ConstTest;
+import org.gnucash.apispec.read.GnuCashStockBuyTransaction;
+import org.gnucash.apispec.read.GnuCashStockDividendTransaction;
+import org.gnucash.apispec.read.GnuCashStockSplitTransaction;
 import org.gnucash.apispec.read.impl.GnuCashStockBuyTransactionImpl;
 import org.gnucash.apispec.read.impl.GnuCashStockDividendTransactionImpl;
+import org.gnucash.apispec.read.impl.GnuCashStockSplitTransactionImpl;
 import org.gnucash.apispec.write.GnuCashWritableStockBuyTransaction;
 import org.gnucash.apispec.write.GnuCashWritableStockDividendTransaction;
+import org.gnucash.apispec.write.GnuCashWritableStockSplitTransaction;
 import org.gnucash.base.basetypes.simple.GCshAcctID;
 import org.gnucash.base.basetypes.simple.GCshTrxID;
 import org.gnucash.base.tuples.AcctIDAmountFPPair;
@@ -43,14 +50,37 @@ public class TestSecuritiesAccountTransactionManager {
 	private static List<AcctIDAmountFPPair> EXPENSES_ACCT_AMT_LIST = new ArrayList<AcctIDAmountFPPair>(); // only for dividend,
 																									// not for buy/sell
 	private static GCshAcctID OFFSET_ACCT_ID = new GCshAcctID("bbf77a599bd24a3dbfec3dd1d0bb9f5c");
+	
+	// ---
 
-	private static FixedPointNumber NOF_STOCKS = new FixedPointNumber(15);          // only for buy/sell, not for dividend
-	private static FixedPointNumber STOCK_PRC  = new FixedPointNumber("23080/100"); // only for buy/sell, not for dividend
-	private static FixedPointNumber DIV_GROSS  = new FixedPointNumber("11223/100"); // only for dividend, not for buy/sell
+	private static FixedPointNumber BUY_NOF_STOCKS  = new FixedPointNumber(15);
+	private static FixedPointNumber BUY_STOCK_PRC   = new FixedPointNumber("23080/100");
+	private static LocalDate        BUY_DATE_POSTED = LocalDate.of(2024, 3, 1);
+	private static String           BUY_DESCR       = "Buying stocks";
+	
+	// ---
 
-	private static LocalDate DATE_POSTED = LocalDate.of(2024, 3, 1);
-	private static String DESCR = "Dividend payment";
+	private static FixedPointNumber DIV_GROSS       = new FixedPointNumber("11223/100");
+	private static LocalDate        DIV_DATE_POSTED = LocalDate.of(2024, 3, 1);
+	private static String           DIV_DESCR       = "Dividend payment";
 
+	// ---
+
+	private static FixedPointNumber SPLT_NOF_SHR_BEFORE_FP = new FixedPointNumber("5");
+	private static FixedPointNumber SPLT_NOF_SHR_AFTER_FP  = new FixedPointNumber("15");
+	private static FixedPointNumber SPLT_FACTOR_FP         = new FixedPointNumber("3");
+	private static FixedPointNumber SPLT_NOF_ADD_FP        = SPLT_NOF_SHR_AFTER_FP.copy().subtract(SPLT_NOF_SHR_BEFORE_FP);
+	// .
+	private static BigFraction      SPLT_NOF_SHR_BEFORE_BF = BigFraction.of(5);
+	private static BigFraction      SPLT_NOF_SHR_AFTER_BF  = BigFraction.of(15);
+	private static BigFraction      SPLT_FACTOR_BF         = BigFraction.of(3);
+	private static BigFraction      SPLT_NOF_ADD_BF        = SPLT_NOF_SHR_AFTER_BF.subtract(SPLT_NOF_SHR_BEFORE_BF);
+	// .
+	private static LocalDate        SPLT_DATE_POSTED       = LocalDate.of(2026, 3, 1);
+	private static String           SPLT_DESCR             = "Stock split";
+
+	// ---
+	
 	// ----------------------------
 
 	private static GCshAcctID STOCK_BUY_EXP_ACCT_1_ID = new GCshAcctID( "7d4b851a3f704c4695d5d466b28cdc55" ); // Bankprovision
@@ -125,8 +155,8 @@ public class TestSecuritiesAccountTransactionManager {
 				SecuritiesAccountTransactionManager
 					.genBuyStockTrx(gcshInFile, 
 									STOCK_ACCT_ID, EXPENSES_ACCT_AMT_LIST, OFFSET_ACCT_ID,
-									NOF_STOCKS, STOCK_PRC, 
-									DATE_POSTED, DESCR);
+									BUY_NOF_STOCKS, BUY_STOCK_PRC, 
+									BUY_DATE_POSTED, BUY_DESCR);
 		assertNotEquals(null, trx);
 		newTrxID.set(trx.getID());
 
@@ -151,7 +181,7 @@ public class TestSecuritiesAccountTransactionManager {
 		GnuCashTransaction genTrx = gcshOutFile.getTransactionByID(newTrxID);
 		assertNotEquals(null, genTrx);
 
-		GnuCashStockBuyTransactionImpl specTrxRO = new GnuCashStockBuyTransactionImpl((GnuCashTransactionImpl) genTrx);
+		GnuCashStockBuyTransaction specTrxRO = new GnuCashStockBuyTransactionImpl((GnuCashTransactionImpl) genTrx);
 		assertNotEquals(null, specTrxRO);
 		assertEquals(newTrxID, specTrxRO.getID());
 
@@ -159,7 +189,7 @@ public class TestSecuritiesAccountTransactionManager {
 //					 specTrxRO.getDatePosted());
 //		assertEquals(LocalDateTime.of(DATE_POSTED, LocalTime.MIDNIGHT), 
 //					 specTrxRO.getDatePosted());
-		assertEquals(ZonedDateTime.of(LocalDateTime.of(DATE_POSTED, LocalTime.MIDNIGHT), 
+		assertEquals(ZonedDateTime.of(LocalDateTime.of(BUY_DATE_POSTED, LocalTime.MIDNIGHT), 
 									  ZoneId.ofOffset("", ZoneOffset.ofHours(1))), 
 					 specTrxRO.getDatePosted());
 		// .
@@ -169,7 +199,7 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(1, specTrxRO.getBalanceRat().getDenominator().longValue());
 		// .
 		assertEquals(3, specTrxRO.getSplits().size());
-		assertEquals(DESCR, specTrxRO.getDescription());
+		assertEquals(BUY_DESCR, specTrxRO.getDescription());
 
 		// ---
 
@@ -202,7 +232,7 @@ public class TestSecuritiesAccountTransactionManager {
 		
 		// ---
 
-		FixedPointNumber amtNet   = NOF_STOCKS.copy().multiply(STOCK_PRC);
+		FixedPointNumber amtNet   = BUY_NOF_STOCKS.copy().multiply(BUY_STOCK_PRC);
 		FixedPointNumber amtGross = amtNet.copy();
 		for ( AcctIDAmountFPPair elt : EXPENSES_ACCT_AMT_LIST ) {
 		    amtGross.add(elt.amount());
@@ -212,9 +242,9 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(GnuCashTransactionSplit.Action.BUY, splt1.getAction());
 		assertEquals(GnuCashTransactionSplit.Action.BUY.getLocaleString(), splt1.getActionStr());
 		// .
-		assertEquals(NOF_STOCKS.doubleValue(), splt1.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(NOF_STOCKS.doubleValue(), splt1.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(NOF_STOCKS.longValue(), splt1.getQuantityRat().getNumerator().longValue());
+		assertEquals(BUY_NOF_STOCKS.doubleValue(), splt1.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(BUY_NOF_STOCKS.doubleValue(), splt1.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(BUY_NOF_STOCKS.longValue(), splt1.getQuantityRat().getNumerator().longValue());
 		assertEquals(1, splt1.getQuantityRat().getDenominator().longValue());
 		// .
 		assertEquals(amtNet.doubleValue(), splt1.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
@@ -264,7 +294,7 @@ public class TestSecuritiesAccountTransactionManager {
 					.genDividDistribTrx(gcshInFile, 
 									STOCK_ACCT_ID, INCOME_ACCT_ID, EXPENSES_ACCT_AMT_LIST, OFFSET_ACCT_ID,
 									GnuCashTransactionSplit.Action.DIVIDEND, DIV_GROSS, 
-									DATE_POSTED, DESCR);
+									DIV_DATE_POSTED, DIV_DESCR);
 		assertNotEquals(null, trx);
 		newTrxID.set(trx.getID());
 
@@ -289,7 +319,7 @@ public class TestSecuritiesAccountTransactionManager {
 		GnuCashTransaction genTrx = gcshOutFile.getTransactionByID(newTrxID);
 		assertNotEquals(null, genTrx);
 
-		GnuCashStockDividendTransactionImpl specTrxRO = new GnuCashStockDividendTransactionImpl((GnuCashTransactionImpl) genTrx);
+		GnuCashStockDividendTransaction specTrxRO = new GnuCashStockDividendTransactionImpl((GnuCashTransactionImpl) genTrx);
 		assertNotEquals(null, specTrxRO);
 		assertEquals(newTrxID, specTrxRO.getID());
 
@@ -297,7 +327,7 @@ public class TestSecuritiesAccountTransactionManager {
 //		 specTrxRO.getDatePosted());
 //		assertEquals(LocalDateTime.of(DATE_POSTED, LocalTime.MIDNIGHT), 
 //		 specTrxRO.getDatePosted());
-		assertEquals(ZonedDateTime.of(LocalDateTime.of(DATE_POSTED, LocalTime.MIDNIGHT), 
+		assertEquals(ZonedDateTime.of(LocalDateTime.of(DIV_DATE_POSTED, LocalTime.MIDNIGHT), 
 					 				  ZoneId.ofOffset("", ZoneOffset.ofHours(1))), 
 					 specTrxRO.getDatePosted());
 		// .
@@ -307,7 +337,7 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(1, specTrxRO.getBalanceRat().getDenominator().longValue());
 		// .
 		assertEquals(5, specTrxRO.getSplits().size());
-		assertEquals(DESCR, specTrxRO.getDescription());
+		assertEquals(DIV_DESCR, specTrxRO.getDescription());
 
 		// ---
 
@@ -441,6 +471,156 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals("", splt5.getDescription());
 	}
 
+	@Test
+	public void test03_1() throws Exception {
+		test03_initExpAccts();
+
+		GnuCashAccount stockAcct = gcshInFile.getAccountByID(STOCK_ACCT_ID);
+		assertEquals(SPLT_NOF_SHR_BEFORE_FP, stockAcct.getBalance());
+		assertEquals(SPLT_NOF_SHR_BEFORE_BF, stockAcct.getBalanceRat());
+		
+		GnuCashWritableStockSplitTransaction trx = 
+				SecuritiesAccountTransactionManager
+					.genStockSplitTrx(gcshInFile, 
+									STOCK_ACCT_ID,
+									SecuritiesAccountTransactionManager.StockSplitVar.FACTOR, SPLT_FACTOR_FP, 
+									SPLT_DATE_POSTED, SPLT_DESCR);
+		assertNotEquals(null, trx);
+		newTrxID.set(trx.getID());
+
+		// ----------------------------
+		// Now, check whether the generated object can be written to the
+		// output file, then re-read from it, and whether is is what
+		// we expect it is.
+
+		File outFile = folder.newFile(ConstTest.GCSH_FILENAME_OUT);
+		// System.err.println("Outfile for TestGnuCashWritableCustomerImpl.test01_1: '"
+		// + outFile.getPath() + "'");
+		outFile.delete(); // sic, the temp. file is already generated (empty),
+						  // and the GnuCash file writer does not like that.
+		gcshInFile.writeFile(outFile);
+
+		test03_check_persisted_hl(outFile);
+		test03_check_persisted_ml(outFile);
+	}
+
+	@Test
+	public void test03_2() throws Exception {
+		test03_initExpAccts();
+
+		GnuCashAccount stockAcct = gcshInFile.getAccountByID(STOCK_ACCT_ID);
+		assertEquals(SPLT_NOF_SHR_BEFORE_FP, stockAcct.getBalance());
+		assertEquals(SPLT_NOF_SHR_BEFORE_BF, stockAcct.getBalanceRat());
+		
+		GnuCashWritableStockSplitTransaction trx = 
+				SecuritiesAccountTransactionManager
+					.genStockSplitTrx(gcshInFile, 
+									STOCK_ACCT_ID,
+									SecuritiesAccountTransactionManager.StockSplitVar.NOF_ADD_SHARES, SPLT_NOF_ADD_FP, 
+									SPLT_DATE_POSTED, SPLT_DESCR);
+		assertNotEquals(null, trx);
+		newTrxID.set(trx.getID());
+
+		// ----------------------------
+		// Now, check whether the generated object can be written to the
+		// output file, then re-read from it, and whether is is what
+		// we expect it is.
+
+		File outFile = folder.newFile(ConstTest.GCSH_FILENAME_OUT);
+		// System.err.println("Outfile for TestGnuCashWritableCustomerImpl.test01_1: '"
+		// + outFile.getPath() + "'");
+		outFile.delete(); // sic, the temp. file is already generated (empty),
+						  // and the GnuCash file writer does not like that.
+		gcshInFile.writeFile(outFile);
+
+		test03_check_persisted_hl(outFile);
+		test03_check_persisted_ml(outFile);
+	}
+	
+	// High-level checks 
+	private void test03_check_persisted_hl(File outFile) throws Exception {
+		gcshOutFile = new GnuCashFileImpl(outFile);
+
+		GnuCashTransaction genTrx = gcshOutFile.getTransactionByID(newTrxID);
+		assertNotEquals(null, genTrx);
+
+		GnuCashStockSplitTransaction specTrxRO = new GnuCashStockSplitTransactionImpl((GnuCashTransactionImpl) genTrx);
+		assertNotEquals(null, specTrxRO);
+		assertEquals(newTrxID, specTrxRO.getID());
+
+		// ---
+
+		GnuCashTransactionSplit splt1 = specTrxRO.getSplit();
+		assertNotEquals(null, splt1);
+		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
+		
+		// ---
+
+		assertEquals(SPLT_NOF_SHR_BEFORE_FP, specTrxRO.getNofSharesBeforeSplit());
+		assertEquals(SPLT_NOF_SHR_BEFORE_BF, specTrxRO.getNofSharesBeforeSplitRat());
+		assertEquals(SPLT_NOF_SHR_AFTER_FP,  specTrxRO.getNofSharesAfterSplit());
+		assertEquals(SPLT_NOF_SHR_AFTER_BF,  specTrxRO.getNofSharesAfterSplitRat());
+		// .
+		assertEquals(SPLT_NOF_ADD_FP,        specTrxRO.getNofAddShares());
+		assertEquals(SPLT_NOF_ADD_BF,        specTrxRO.getNofAddSharesRat());
+		// .
+		assertEquals(SPLT_FACTOR_FP,         specTrxRO.getSplitFactor());
+		assertEquals(SPLT_FACTOR_BF,         specTrxRO.getSplitFactorRat());
+	}
+
+	// Mid-level checks (i.e., "manually") 
+	private void test03_check_persisted_ml(File outFile) throws Exception {
+		gcshOutFile = new GnuCashFileImpl(outFile);
+
+		GnuCashTransaction genTrx = gcshOutFile.getTransactionByID(newTrxID);
+		assertNotEquals(null, genTrx);
+
+		GnuCashTransaction specTrxRO = new GnuCashTransactionImpl((GnuCashTransactionImpl) genTrx);
+		assertNotEquals(null, specTrxRO);
+		assertEquals(newTrxID, specTrxRO.getID());
+
+//		assertEquals(ZonedDateTime.of(LocalDateTime.of(DATE_POSTED, LocalTime.MIDNIGHT), ZoneId.systemDefault()), 
+//		 specTrxRO.getDatePosted());
+//		assertEquals(LocalDateTime.of(DATE_POSTED, LocalTime.MIDNIGHT), 
+//		 specTrxRO.getDatePosted());
+		assertEquals(ZonedDateTime.of(LocalDateTime.of(SPLT_DATE_POSTED, LocalTime.MIDNIGHT), 
+					 				  ZoneId.ofOffset("", ZoneOffset.ofHours(1))), 
+					 specTrxRO.getDatePosted());
+		// .
+		assertEquals(0.0, specTrxRO.getBalance().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0.0, specTrxRO.getBalanceRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0, specTrxRO.getBalanceRat().getNumerator().longValue());
+		assertEquals(1, specTrxRO.getBalanceRat().getDenominator().longValue());
+		// .
+		assertEquals(1, specTrxRO.getSplits().size());
+		assertEquals(SPLT_DESCR, specTrxRO.getDescription());
+
+		// ---
+
+		GnuCashTransactionSplit splt1 = specTrxRO.getSplits().get(0);
+		assertNotEquals(null, splt1);
+		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
+		
+		// ---
+
+		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
+		assertEquals(GnuCashTransactionSplit.Action.SPLIT, splt1.getAction());
+		assertEquals(GnuCashTransactionSplit.Action.SPLIT.getLocaleString(), splt1.getActionStr());
+		// .
+		assertEquals(SPLT_NOF_ADD_FP, splt1.getQuantity());
+		assertEquals(SPLT_NOF_ADD_BF, splt1.getQuantityRat());
+		assertEquals(SPLT_NOF_SHR_AFTER_FP, splt1.getAccount().getBalance());
+		assertEquals(SPLT_NOF_SHR_AFTER_BF, splt1.getAccount().getBalanceRat());
+		// .
+		assertEquals(0.0, splt1.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0.0, splt1.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(0, splt1.getValueRat().getNumerator().longValue());
+		assertEquals(1, splt1.getValueRat().getDenominator().longValue());
+		// .
+		String descRefStart = "Generated by SecuritiesAccountTransactionManager";
+		assertEquals(descRefStart, splt1.getDescription().subSequence(0, descRefStart.length()));
+	}
+
 	// ---------------------------------------------------------------
 	
 	// 
@@ -463,6 +643,10 @@ public class TestSecuritiesAccountTransactionManager {
 		
 		AcctIDAmountFPPair acctAmtPr2 = new AcctIDAmountFPPair(DIVIDEND_EXP_ACCT_2_ID, DIVIDEND_EXP_2);
 		EXPENSES_ACCT_AMT_LIST.add(acctAmtPr2);
+	}
+
+	private void test03_initExpAccts() {
+		EXPENSES_ACCT_AMT_LIST.clear();
 	}
 
 }
