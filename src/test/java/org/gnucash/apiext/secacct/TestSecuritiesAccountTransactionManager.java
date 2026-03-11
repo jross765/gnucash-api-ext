@@ -53,11 +53,21 @@ public class TestSecuritiesAccountTransactionManager {
 	
 	// ---
 
-	private static FixedPointNumber BUY_NOF_STOCKS  = new FixedPointNumber(15);
-	private static FixedPointNumber BUY_STOCK_PRC   = new FixedPointNumber("23080/100");
-	private static LocalDate        BUY_DATE_POSTED = LocalDate.of(2024, 3, 1);
-	private static String           BUY_DESCR       = "Buying stocks";
-	
+	private static FixedPointNumber BUY_NOF_STOCKS_FP  = new FixedPointNumber(15);
+	private static FixedPointNumber BUY_STOCK_PRC_FP   = new FixedPointNumber("23080/100");
+	private static FixedPointNumber BUY_NET_PRC_FP     = BUY_STOCK_PRC_FP.copy().multiply(BUY_NOF_STOCKS_FP);
+	private static FixedPointNumber BUY_FEETAX_FP      = new FixedPointNumber("9,45");
+	private static FixedPointNumber BUY_GROSS_PRC_FP   = BUY_NET_PRC_FP.copy().add(BUY_FEETAX_FP);
+	// .
+	private static BigFraction      BUY_NOF_STOCKS_BF  = BigFraction.of(15);
+	private static BigFraction      BUY_STOCK_PRC_BF   = BigFraction.of(23080, 100);
+	private static BigFraction      BUY_NET_PRC_BF     = BUY_STOCK_PRC_BF.multiply(BUY_NOF_STOCKS_BF);
+	private static BigFraction      BUY_FEETAX_BF      = BigFraction.of(945, 100);
+	private static BigFraction      BUY_GROSS_PRC_BF   = BUY_NET_PRC_BF.add(BUY_FEETAX_BF);
+	// .
+	private static LocalDate        BUY_DATE_POSTED    = LocalDate.of(2024, 3, 1);
+	private static String           BUY_DESCR          = "Buying stocks";
+
 	// ---
 
 	private static FixedPointNumber DIV_GROSS       = new FixedPointNumber("11223/100");
@@ -79,21 +89,19 @@ public class TestSecuritiesAccountTransactionManager {
 	private static LocalDate        SPLT_DATE_POSTED       = LocalDate.of(2026, 3, 1);
 	private static String           SPLT_DESCR             = "Stock split";
 
-	// ---
+	// ----------------------------
+
+	private static GCshAcctID BUY_EXP_ACCT_1_ID = new GCshAcctID( "7d4b851a3f704c4695d5d466b28cdc55" ); // Bankprovision
+
+	FixedPointNumber BUY_EXP_1 = new FixedPointNumber("945/100");
 	
 	// ----------------------------
 
-	private static GCshAcctID STOCK_BUY_EXP_ACCT_1_ID = new GCshAcctID( "7d4b851a3f704c4695d5d466b28cdc55" ); // Bankprovision
+	private static GCshAcctID DIV_EXP_ACCT_1_ID = new GCshAcctID( "2a195872e24048a0a6228107ca8b6a52" ); // Kapitalertragsteuer
+	private static GCshAcctID DIV_EXP_ACCT_2_ID = new GCshAcctID( "41e998de2af144c7a9db5049fb677f8a" ); // Soli
 
-	FixedPointNumber STOCK_BUY_EXP_1 = new FixedPointNumber("945/100");
-	
-	// ----------------------------
-
-	private static GCshAcctID DIVIDEND_EXP_ACCT_1_ID = new GCshAcctID( "2a195872e24048a0a6228107ca8b6a52" ); // Kapitalertragsteuer
-	private static GCshAcctID DIVIDEND_EXP_ACCT_2_ID = new GCshAcctID( "41e998de2af144c7a9db5049fb677f8a" ); // Soli
-
-	FixedPointNumber DIVIDEND_EXP_1 = DIV_GROSS.copy().multiply(new FixedPointNumber("25/100"));
-	FixedPointNumber DIVIDEND_EXP_2 = STOCK_BUY_EXP_1.copy().multiply(new FixedPointNumber("55/100"));
+	FixedPointNumber DIV_EXP_1 = DIV_GROSS.copy().multiply(new FixedPointNumber("25/100"));
+	FixedPointNumber DIV_EXP_2 = BUY_EXP_1.copy().multiply(new FixedPointNumber("55/100"));
 	
 	// -----------------------------------------------------------------
 
@@ -155,7 +163,7 @@ public class TestSecuritiesAccountTransactionManager {
 				SecuritiesAccountTransactionManager
 					.genBuyStockTrx(gcshInFile, 
 									STOCK_ACCT_ID, EXPENSES_ACCT_AMT_LIST, OFFSET_ACCT_ID,
-									BUY_NOF_STOCKS, BUY_STOCK_PRC, 
+									BUY_NOF_STOCKS_FP, BUY_STOCK_PRC_FP, 
 									BUY_DATE_POSTED, BUY_DESCR);
 		assertNotEquals(null, trx);
 		newTrxID.set(trx.getID());
@@ -172,16 +180,60 @@ public class TestSecuritiesAccountTransactionManager {
 						  // and the GnuCash file writer does not like that.
 		gcshInFile.writeFile(outFile);
 
-		test01_check_persisted(outFile);
+		test01_check_persisted_hl(outFile);
+		test01_check_persisted_ml(outFile);
 	}
 
-	private void test01_check_persisted(File outFile) throws Exception {
+	// High-level checks 
+	private void test01_check_persisted_hl(File outFile) throws Exception {
 		gcshOutFile = new GnuCashFileImpl(outFile);
 
 		GnuCashTransaction genTrx = gcshOutFile.getTransactionByID(newTrxID);
 		assertNotEquals(null, genTrx);
 
 		GnuCashStockBuyTransaction specTrxRO = new GnuCashStockBuyTransactionImpl((GnuCashTransactionImpl) genTrx);
+		assertNotEquals(null, specTrxRO);
+		assertEquals(newTrxID, specTrxRO.getID());
+
+		// ---
+
+		GnuCashTransactionSplit splt1 = specTrxRO.getStockAccountSplit();
+		assertNotEquals(null, splt1);
+		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
+		
+		GnuCashTransactionSplit splt2 = specTrxRO.getOffsettingAccountSplit();
+		assertNotEquals(null, splt1);
+		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID());
+		
+		assertNotEquals(null, specTrxRO.getExpensesSplits());
+		assertEquals(1, specTrxRO.getExpensesSplits().size());
+
+		// ---
+
+		assertEquals(BUY_NOF_STOCKS_FP, specTrxRO.getNofShares());
+		assertEquals(BUY_NOF_STOCKS_BF, specTrxRO.getNofSharesRat());
+		// .
+		assertEquals(BUY_STOCK_PRC_FP,  specTrxRO.getPricePerShare());
+		assertEquals(BUY_STOCK_PRC_BF,  specTrxRO.getPricePerShareRat());
+		// .
+		assertEquals(BUY_NET_PRC_FP,    specTrxRO.getNetPrice());
+		assertEquals(BUY_NET_PRC_BF,    specTrxRO.getNetPriceRat());
+		// .
+		assertEquals(BUY_FEETAX_FP,     specTrxRO.getFeesTaxes());
+		assertEquals(BUY_FEETAX_BF,     specTrxRO.getFeesTaxesRat());
+		// .
+		assertEquals(BUY_GROSS_PRC_FP,  specTrxRO.getGrossPrice());
+		assertEquals(BUY_GROSS_PRC_BF,  specTrxRO.getGrossPriceRat());
+	}
+
+	// Mid-level checks (i.e., "manually") 
+	private void test01_check_persisted_ml(File outFile) throws Exception {
+		gcshOutFile = new GnuCashFileImpl(outFile);
+
+		GnuCashTransaction genTrx = gcshOutFile.getTransactionByID(newTrxID);
+		assertNotEquals(null, genTrx);
+
+		GnuCashTransaction specTrxRO = new GnuCashStockBuyTransactionImpl((GnuCashTransactionImpl) genTrx);
 		assertNotEquals(null, specTrxRO);
 		assertEquals(newTrxID, specTrxRO.getID());
 
@@ -223,7 +275,7 @@ public class TestSecuritiesAccountTransactionManager {
 		
 		GnuCashTransactionSplit splt3 = null;
 		for ( GnuCashTransactionSplit splt : specTrxRO.getSplits() ) {
-			if ( splt.getAccountID().equals(STOCK_BUY_EXP_ACCT_1_ID) ) {
+			if ( splt.getAccountID().equals(BUY_EXP_ACCT_1_ID) ) {
 				splt3 = splt;
 				break;
 			}
@@ -232,19 +284,22 @@ public class TestSecuritiesAccountTransactionManager {
 		
 		// ---
 
-		FixedPointNumber amtNet   = BUY_NOF_STOCKS.copy().multiply(BUY_STOCK_PRC);
-		FixedPointNumber amtGross = amtNet.copy();
+		FixedPointNumber amtNet   = BUY_NOF_STOCKS_FP.copy().multiply(BUY_STOCK_PRC_FP);
+		FixedPointNumber feeTax   = new FixedPointNumber();
 		for ( AcctIDAmountFPPair elt : EXPENSES_ACCT_AMT_LIST ) {
-		    amtGross.add(elt.amount());
+		    feeTax.add(elt.amount());
 		}
+		FixedPointNumber amtGross = amtNet.copy().add(feeTax);
+		
+		assertEquals(BUY_FEETAX_FP, feeTax);
 		
 		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
 		assertEquals(GnuCashTransactionSplit.Action.BUY, splt1.getAction());
 		assertEquals(GnuCashTransactionSplit.Action.BUY.getLocaleString(), splt1.getActionStr());
 		// .
-		assertEquals(BUY_NOF_STOCKS.doubleValue(), splt1.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(BUY_NOF_STOCKS.doubleValue(), splt1.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(BUY_NOF_STOCKS.longValue(), splt1.getQuantityRat().getNumerator().longValue());
+		assertEquals(BUY_NOF_STOCKS_FP.doubleValue(), splt1.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(BUY_NOF_STOCKS_FP.doubleValue(), splt1.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(BUY_NOF_STOCKS_FP.longValue(), splt1.getQuantityRat().getNumerator().longValue());
 		assertEquals(1, splt1.getQuantityRat().getDenominator().longValue());
 		// .
 		assertEquals(amtNet.doubleValue(), splt1.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
@@ -269,16 +324,16 @@ public class TestSecuritiesAccountTransactionManager {
 		// .
 		assertEquals("", splt2.getDescription());
 
-		assertEquals(STOCK_BUY_EXP_ACCT_1_ID, splt3.getAccountID());
+		assertEquals(BUY_EXP_ACCT_1_ID, splt3.getAccountID());
 		assertEquals(null, splt3.getAction());
 		// .
-		assertEquals(STOCK_BUY_EXP_1.doubleValue(), splt3.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(STOCK_BUY_EXP_1.doubleValue(), splt3.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(BUY_EXP_1.doubleValue(), splt3.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(BUY_EXP_1.doubleValue(), splt3.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(189, splt3.getQuantityRat().getNumerator().longValue());
 		assertEquals(20, splt3.getQuantityRat().getDenominator().longValue());
 		// .
-		assertEquals(STOCK_BUY_EXP_1.doubleValue(), splt3.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(STOCK_BUY_EXP_1.doubleValue(), splt3.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(BUY_EXP_1.doubleValue(), splt3.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(BUY_EXP_1.doubleValue(), splt3.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(189, splt3.getValueRat().getNumerator().longValue());
 		assertEquals(20, splt3.getValueRat().getDenominator().longValue());
 		// .
@@ -310,10 +365,11 @@ public class TestSecuritiesAccountTransactionManager {
 						  // and the GnuCash file writer does not like that.
 		gcshInFile.writeFile(outFile);
 
-		test02_check_persisted(outFile);
+		test02_check_persisted_ml(outFile);
 	}
 
-	private void test02_check_persisted(File outFile) throws Exception {
+	// Mid-level checks (i.e., "manually") 
+	private void test02_check_persisted_ml(File outFile) throws Exception {
 		gcshOutFile = new GnuCashFileImpl(outFile);
 
 		GnuCashTransaction genTrx = gcshOutFile.getTransactionByID(newTrxID);
@@ -370,7 +426,7 @@ public class TestSecuritiesAccountTransactionManager {
 		
 		GnuCashTransactionSplit splt4 = null;
 		for ( GnuCashTransactionSplit splt : specTrxRO.getSplits() ) {
-			if ( splt.getAccountID().equals(DIVIDEND_EXP_ACCT_1_ID) ) {
+			if ( splt.getAccountID().equals(DIV_EXP_ACCT_1_ID) ) {
 				splt4 = splt;
 				break;
 			}
@@ -379,7 +435,7 @@ public class TestSecuritiesAccountTransactionManager {
 		
 		GnuCashTransactionSplit splt5 = null;
 		for ( GnuCashTransactionSplit splt : specTrxRO.getSplits() ) {
-			if ( splt.getAccountID().equals(DIVIDEND_EXP_ACCT_2_ID) ) {
+			if ( splt.getAccountID().equals(DIV_EXP_ACCT_2_ID) ) {
 				splt5 = splt;
 				break;
 			}
@@ -440,31 +496,31 @@ public class TestSecuritiesAccountTransactionManager {
 		// .
 		assertEquals("", splt3.getDescription());
 
-		assertEquals(DIVIDEND_EXP_ACCT_1_ID, splt4.getAccountID());
+		assertEquals(DIV_EXP_ACCT_1_ID, splt4.getAccountID());
 		assertEquals(null, splt4.getAction());
 		// .
-		assertEquals(DIVIDEND_EXP_1.doubleValue(), splt4.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(DIVIDEND_EXP_1.doubleValue(), splt4.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIV_EXP_1.doubleValue(), splt4.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIV_EXP_1.doubleValue(), splt4.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(11223, splt4.getQuantityRat().getNumerator().longValue());
 		assertEquals(400, splt4.getQuantityRat().getDenominator().longValue());
 		// .
-		assertEquals(DIVIDEND_EXP_1.doubleValue(), splt4.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(DIVIDEND_EXP_1.doubleValue(), splt4.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIV_EXP_1.doubleValue(), splt4.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIV_EXP_1.doubleValue(), splt4.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(11223, splt4.getValueRat().getNumerator().longValue());
 		assertEquals(400, splt4.getValueRat().getDenominator().longValue());
 		// .
 		assertEquals("", splt4.getDescription());
 
-		assertEquals(DIVIDEND_EXP_ACCT_2_ID, splt5.getAccountID());
+		assertEquals(DIV_EXP_ACCT_2_ID, splt5.getAccountID());
 		assertEquals(null, splt5.getAction());
 		// .
-		assertEquals(DIVIDEND_EXP_2.doubleValue(), splt5.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(DIVIDEND_EXP_2.doubleValue(), splt5.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIV_EXP_2.doubleValue(), splt5.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIV_EXP_2.doubleValue(), splt5.getQuantityRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(2079, splt5.getQuantityRat().getNumerator().longValue());
 		assertEquals(400, splt5.getQuantityRat().getDenominator().longValue());
 		// .
-		assertEquals(DIVIDEND_EXP_2.doubleValue(), splt5.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(DIVIDEND_EXP_2.doubleValue(), splt5.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIV_EXP_2.doubleValue(), splt5.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIV_EXP_2.doubleValue(), splt5.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(2079, splt5.getValueRat().getNumerator().longValue());
 		assertEquals(400, splt5.getValueRat().getDenominator().longValue());
 		// .
@@ -617,8 +673,7 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(0, splt1.getValueRat().getNumerator().longValue());
 		assertEquals(1, splt1.getValueRat().getDenominator().longValue());
 		// .
-		String descRefStart = "Generated by SecuritiesAccountTransactionManager";
-		assertEquals(descRefStart, splt1.getDescription().subSequence(0, descRefStart.length()));
+		assertEquals(true, splt1.getDescription().startsWith("Generated by SecuritiesAccountTransactionManager"));
 	}
 
 	// ---------------------------------------------------------------
@@ -627,7 +682,7 @@ public class TestSecuritiesAccountTransactionManager {
 	private void test01_initExpAccts() {
 		EXPENSES_ACCT_AMT_LIST.clear();
 		
-		AcctIDAmountFPPair acctAmtPr1 = new AcctIDAmountFPPair(STOCK_BUY_EXP_ACCT_1_ID, STOCK_BUY_EXP_1);
+		AcctIDAmountFPPair acctAmtPr1 = new AcctIDAmountFPPair(BUY_EXP_ACCT_1_ID, BUY_EXP_1);
 		EXPENSES_ACCT_AMT_LIST.add(acctAmtPr1);
 	}
 
@@ -638,10 +693,10 @@ public class TestSecuritiesAccountTransactionManager {
 	private void test02_initExpAccts() {
 		EXPENSES_ACCT_AMT_LIST.clear();
 		
-		AcctIDAmountFPPair acctAmtPr1 = new AcctIDAmountFPPair(DIVIDEND_EXP_ACCT_1_ID, DIVIDEND_EXP_1);
+		AcctIDAmountFPPair acctAmtPr1 = new AcctIDAmountFPPair(DIV_EXP_ACCT_1_ID, DIV_EXP_1);
 		EXPENSES_ACCT_AMT_LIST.add(acctAmtPr1);
 		
-		AcctIDAmountFPPair acctAmtPr2 = new AcctIDAmountFPPair(DIVIDEND_EXP_ACCT_2_ID, DIVIDEND_EXP_2);
+		AcctIDAmountFPPair acctAmtPr2 = new AcctIDAmountFPPair(DIV_EXP_ACCT_2_ID, DIV_EXP_2);
 		EXPENSES_ACCT_AMT_LIST.add(acctAmtPr2);
 	}
 
