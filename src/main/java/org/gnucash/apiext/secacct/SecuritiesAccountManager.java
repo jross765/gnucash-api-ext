@@ -66,19 +66,31 @@ public class SecuritiesAccountManager {
     // ---------------------------------------------------------------
     
     public List<GnuCashAccount> getShareAccts() {
+    	return getShareAccts(false);
+    }
+    
+    public List<GnuCashAccount> getShareAccts(boolean activeOnly) {
+    	if ( activeOnly )
+    		return getActiveShareAccts();
+    	else
+    		return getAllShareAccts();
+    }
+    
+	public List<GnuCashAccount> getAllShareAccts() {
     	return invstAcct.getChildren();
     }
     
 	public ArrayList<GnuCashAccount> getActiveShareAccts() {
     	ArrayList<GnuCashAccount> result = new ArrayList<GnuCashAccount>();
     	
-    	for ( GnuCashAccount acct : getShareAccts() ) {
-    		if ( acct.getBalance().isGreaterThan(new FixedPointNumber()) ) {
+    	for ( GnuCashAccount acct : getAllShareAccts() ) {
+    		if ( ! acct.isHidden() &&
+    			 acct.getBalance().isGreaterThan(new FixedPointNumber()) ) {
     			result.add(acct);
     		}
     	}
     	
     	return result;
     }
-    
+
 }
