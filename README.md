@@ -44,10 +44,14 @@ Adapted to module "Base", V. 1.8 and "API Specialized Entities", V. 0.3.
 In more detail:
 
 * Package SecAcct:
-  
-  Changed interface: Transaction-generating methods now return the 
-  according specialized entities from module "API Specialized 
-  Entities", as you would expect.
+  * `SecuritiesAccountManager`: 
+     * Added more variants of method `getShareAccounts()`
+     * Changed logic of method `getActiveShareAccounts()`
+       (now additianally checks for account being hidden).
+  * `SecuritiesAccountTransactionManager`: Changed interface:
+    Transaction-generating methods now return the according specialized
+    entities from module "API Specialized Entities", 
+    as you would expect.
 
 * Package TrxMgr:
   
