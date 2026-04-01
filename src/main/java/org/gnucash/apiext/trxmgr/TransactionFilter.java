@@ -39,7 +39,7 @@ public class TransactionFilter {
 	// ----------------------------
 	// Split Level
 
-	public TransactionSplitFilter spltFilt;
+	public TransactionSplitFilter_FP spltFilt;
 	
 	// ---------------------------------------------------------------
 	
@@ -66,7 +66,7 @@ public class TransactionFilter {
 		
 		// ---
 		
-		spltFilt = new TransactionSplitFilter();
+		spltFilt = new TransactionSplitFilter_FP();
 	}
 	
 	public void reset() {

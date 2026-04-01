@@ -85,7 +85,7 @@ public class SecuritiesAccountManager {
     	
     	for ( GnuCashAccount acct : getAllShareAccts() ) {
     		if ( ! acct.isHidden() &&
-    			 acct.getBalance().isGreaterThan(new FixedPointNumber()) ) {
+    			 acct.getBalance().isGreaterThan(FixedPointNumber.ZERO) ) {
     			result.add(acct);
     		}
     	}

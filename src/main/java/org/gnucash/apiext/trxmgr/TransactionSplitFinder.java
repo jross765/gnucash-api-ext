@@ -32,7 +32,7 @@ public class TransactionSplitFinder {
 	// ::TODO
 	// - Have results writable?
     
-	public ArrayList<GnuCashTransactionSplit> find(TransactionSplitFilter flt) {
+	public ArrayList<GnuCashTransactionSplit> find(TransactionSplitFilter_FP flt) {
 		if ( flt == null ) {
 			throw new IllegalArgumentException("argument <flt> is null");
 		}

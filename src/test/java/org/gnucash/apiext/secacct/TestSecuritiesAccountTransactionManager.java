@@ -168,7 +168,7 @@ public class TestSecuritiesAccountTransactionManager {
 		test01_initExpAccts();
 
 		GnuCashWritableStockBuyTransaction trx = 
-				SecuritiesAccountTransactionManager
+				SecuritiesAccountTransactionManager_FP
 					.genBuyStockTrx(gcshInFile, 
 									STOCK_ACCT_ID, EXPENSES_ACCT_AMT_FP_LIST, OFFSET_ACCT_ID,
 									BUY_NOF_STOCKS_FP, BUY_STOCK_PRC_FP, 
@@ -346,7 +346,7 @@ public class TestSecuritiesAccountTransactionManager {
 		test02_initExpAccts();
 
 		GnuCashWritableStockDividendTransaction trx = 
-				SecuritiesAccountTransactionManager
+				SecuritiesAccountTransactionManager_FP
 					.genDividDistribTrx(gcshInFile, 
 									STOCK_ACCT_ID, INCOME_ACCT_ID, EXPENSES_ACCT_AMT_FP_LIST, OFFSET_ACCT_ID,
 									GnuCashTransactionSplit.Action.DIVIDEND, DIV_GROSS_FP, 
@@ -566,10 +566,10 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(SPLT_NOF_SHR_BEFORE_BF, stockAcct.getBalanceRat());
 		
 		GnuCashWritableStockSplitTransaction trx = 
-				SecuritiesAccountTransactionManager
+				SecuritiesAccountTransactionManager_FP
 					.genStockSplitTrx(gcshInFile, 
 									STOCK_ACCT_ID,
-									SecuritiesAccountTransactionManager.StockSplitVar.FACTOR, SPLT_FACTOR_FP, 
+									SecuritiesAccountTransactionManager_FP.StockSplitVar.FACTOR, SPLT_FACTOR_FP, 
 									SPLT_DATE_POSTED, SPLT_DESCR);
 		assertNotEquals(null, trx);
 		newTrxID.set(trx.getID());
@@ -599,10 +599,10 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(SPLT_NOF_SHR_BEFORE_BF, stockAcct.getBalanceRat());
 		
 		GnuCashWritableStockSplitTransaction trx = 
-				SecuritiesAccountTransactionManager
+				SecuritiesAccountTransactionManager_FP
 					.genStockSplitTrx(gcshInFile, 
 									STOCK_ACCT_ID,
-									SecuritiesAccountTransactionManager.StockSplitVar.NOF_ADD_SHARES, SPLT_NOF_ADD_FP, 
+									SecuritiesAccountTransactionManager_FP.StockSplitVar.NOF_ADD_SHARES, SPLT_NOF_ADD_FP, 
 									SPLT_DATE_POSTED, SPLT_DESCR);
 		assertNotEquals(null, trx);
 		newTrxID.set(trx.getID());

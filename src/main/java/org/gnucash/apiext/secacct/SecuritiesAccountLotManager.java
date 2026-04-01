@@ -62,7 +62,7 @@ public class SecuritiesAccountLotManager {
 			return false;
     	}
     	
-		FixedPointNumber spltSum = new FixedPointNumber("0");
+		FixedPointNumber spltSum = FixedPointNumber.ZERO.copy();
 		for ( GnuCashTransactionSplit splt : lot.getTransactionSplits() ) {
 			LOGGER.debug("Split: ID " + splt.getID() + ", value: '" + splt.getValueFormatted() + "'");
 			spltSum = splt.getValue();

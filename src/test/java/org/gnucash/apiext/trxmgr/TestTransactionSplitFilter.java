@@ -31,7 +31,7 @@ public class TestTransactionSplitFilter {
 	// -----------------------------------------------------------------
 
 	private GnuCashFile gcshFile = null;
-	private TransactionSplitFilter flt = null;
+	private TransactionSplitFilter_FP flt = null;
 	private GnuCashTransactionSplit splt = null;
 
 	// -----------------------------------------------------------------
@@ -72,7 +72,7 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test01() throws Exception {
-		flt = new TransactionSplitFilter();
+		flt = new TransactionSplitFilter_FP();
 		flt.acctID.set(ACCT_1_ID);
 		splt = gcshFile.getTransactionSplitByID(TRXSPLT_1_ID);
 		
@@ -84,7 +84,7 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test02_1() throws Exception {
-		flt = new TransactionSplitFilter();
+		flt = new TransactionSplitFilter_FP();
 		flt.acctID.set(ACCT_1_ID);
 		flt.valueFrom = new FixedPointNumber("-2253.00");
 		flt.valueTo = new FixedPointNumber("-2253.00");
@@ -107,7 +107,7 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test02_2() throws Exception {
-		flt = new TransactionSplitFilter();
+		flt = new TransactionSplitFilter_FP();
 		flt.acctID.set(ACCT_7_ID);
 		flt.valueFrom = new FixedPointNumber("-2253.00");
 		flt.valueTo = new FixedPointNumber("2253.00");
@@ -140,7 +140,7 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test03_1() throws Exception {
-		flt = new TransactionSplitFilter();
+		flt = new TransactionSplitFilter_FP();
 		flt.acctID.set(ACCT_1_ID);
 		flt.quantityFrom = new FixedPointNumber("-2253.00");
 		flt.quantityTo = new FixedPointNumber("-2253.00");
@@ -163,7 +163,7 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test03_2() throws Exception {
-		flt = new TransactionSplitFilter();
+		flt = new TransactionSplitFilter_FP();
 		flt.acctID.set(ACCT_7_ID);
 		flt.quantityFrom = new FixedPointNumber("100.0000");
 		flt.quantityTo = new FixedPointNumber("100.0000");
@@ -196,7 +196,7 @@ public class TestTransactionSplitFilter {
 	
 	@Test
 	public void test04() throws Exception {
-		flt = new TransactionSplitFilter();
+		flt = new TransactionSplitFilter_FP();
 		flt.acctID.set(ACCT_7_ID);
 		flt.action = GnuCashTransactionSplit.Action.BUY;
 		splt = gcshFile.getTransactionSplitByID(TRXSPLT_2_ID);
@@ -209,7 +209,7 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test05() throws Exception {
-		flt = new TransactionSplitFilter();
+		flt = new TransactionSplitFilter_FP();
 		flt.acctID.set(ACCT_7_ID);
 		flt.descrPart = ""; // sic, the TRANSACTION's description is set, not the SPLIT's one
 		splt = gcshFile.getTransactionSplitByID(TRXSPLT_2_ID);

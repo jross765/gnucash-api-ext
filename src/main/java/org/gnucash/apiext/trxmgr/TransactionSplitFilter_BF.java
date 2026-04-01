@@ -2,6 +2,7 @@ package org.gnucash.apiext.trxmgr;
 
 import java.math.BigDecimal;
 
+import org.apache.commons.numbers.fraction.BigFraction;
 import org.gnucash.api.read.GnuCashAccount;
 import org.gnucash.api.read.GnuCashTransactionSplit;
 import org.gnucash.api.read.impl.GnuCashTransactionSplitImpl;
@@ -10,7 +11,7 @@ import org.gnucash.base.basetypes.simple.GCshAcctID;
 
 import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
-public class TransactionSplitFilter {
+public class TransactionSplitFilter_BF {
 
 	// ---------------------------------------------------------------
 
@@ -21,19 +22,19 @@ public class TransactionSplitFilter {
 	
 	public GnuCashAccount.Type acctType;
 	
-	public FixedPointNumber valueFrom;
-	public FixedPointNumber valueTo;
+	public BigFraction      valueFrom;
+	public BigFraction      valueTo;
 	public boolean          valueAbs;
 	
-	public FixedPointNumber quantityFrom;
-	public FixedPointNumber quantityTo;
+	public BigFraction      quantityFrom;
+	public BigFraction      quantityTo;
 	public boolean          quantityAbs;
 	
 	public String descrPart;
 	
 	// ---------------------------------------------------------------
 	
-	public TransactionSplitFilter() {
+	public TransactionSplitFilter_BF() {
 		init();
 		reset();
 	}
@@ -48,12 +49,13 @@ public class TransactionSplitFilter {
 		
 		acctType = null;
 		
-		valueFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
-		valueTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+		// a bit bulky, I admit...
+		valueFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
+		valueTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
 		valueAbs  = false;
 		
-		quantityFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
-		quantityTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+		quantityFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
+		quantityTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
 		quantityAbs  = false;
 		
 		descrPart = "";
@@ -67,12 +69,13 @@ public class TransactionSplitFilter {
 
 		acctType = null;
 
-		valueFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
-		valueTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+		// a bit bulky, I admit...
+		valueFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
+		valueTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
 		valueAbs  = false;
 
-		quantityFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
-		quantityTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+		quantityFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
+		quantityTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
 		quantityAbs  = false;
 		
 		descrPart = "";
@@ -136,7 +139,7 @@ public class TransactionSplitFilter {
 		
 		// ---
 		
-		if ( valueFrom.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
+		if ( valueFrom.bigDecimalValue().doubleValue() != Const.UNSET_VALUE ) {
 			FixedPointNumber val = splt.getValue();
 			if ( valueAbs && 
 				 val.isNegative() ) {
@@ -148,7 +151,7 @@ public class TransactionSplitFilter {
 			}
 		}
 		
-		if ( valueTo.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
+		if ( valueTo.bigDecimalValue().doubleValue() != Const.UNSET_VALUE ) {
 			FixedPointNumber val = splt.getValue();
 			if ( valueAbs && 
 				 val.isNegative() ) {
@@ -162,7 +165,7 @@ public class TransactionSplitFilter {
 		
 		// ---
 		
-		if ( quantityFrom.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
+		if ( quantityFrom.bigDecimalValue().doubleValue() != Const.UNSET_VALUE ) {
 			FixedPointNumber qty = splt.getQuantity();
 			if ( quantityAbs && 
 				 qty.isNegative() ) {
@@ -174,7 +177,7 @@ public class TransactionSplitFilter {
 			}
 		}
 		
-		if ( quantityTo.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
+		if ( quantityTo.bigDecimalValue().doubleValue() != Const.UNSET_VALUE ) {
 			FixedPointNumber qty = splt.getQuantity();
 			if ( quantityAbs && 
 				 qty.isNegative() ) {
@@ -213,12 +216,12 @@ public class TransactionSplitFilter {
 				     
 	               "acctType=" + acctType + ", " +
 
-				  "valueFrom=" + valueFrom + ( valueFrom.getBigDecimal().doubleValue() == Const.UNSET_VALUE ? " (unset)" : "" ) + ", " +
-	                "valueTo=" + valueTo   + ( valueTo  .getBigDecimal().doubleValue() == Const.UNSET_VALUE ? " (unset)" : "" ) + ", " +
+				  "valueFrom=" + valueFrom + ( valueFrom.bigDecimalValue().doubleValue() == Const.UNSET_VALUE ? " (unset)" : "" ) + ", " +
+	                "valueTo=" + valueTo   + ( valueTo  .bigDecimalValue().doubleValue() == Const.UNSET_VALUE ? " (unset)" : "" ) + ", " +
 	               "valueAbs=" + valueAbs + ", " +
 
-			   "quantityFrom=" + quantityFrom + ( quantityFrom.getBigDecimal().doubleValue() == Const.UNSET_VALUE ? " (unset)" : "" ) + ", " + 
-	             "quantityTo=" + quantityTo   + ( quantityTo  .getBigDecimal().doubleValue() == Const.UNSET_VALUE ? " (unset)" : "" ) + ", " +
+			   "quantityFrom=" + quantityFrom + ( quantityFrom.bigDecimalValue().doubleValue() == Const.UNSET_VALUE ? " (unset)" : "" ) + ", " + 
+	             "quantityTo=" + quantityTo   + ( quantityTo  .bigDecimalValue().doubleValue() == Const.UNSET_VALUE ? " (unset)" : "" ) + ", " +
 	            "quantityAbs=" + quantityAbs+ ", " +
 
 			      "descrPart='" + descrPart + "']";
