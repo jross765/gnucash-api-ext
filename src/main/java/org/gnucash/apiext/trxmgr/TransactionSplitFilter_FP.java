@@ -12,12 +12,15 @@ import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
 public class TransactionSplitFilter_FP {
 
+	// a bit bulky, I admit...
+	static final FixedPointNumber UNSET_VALUE = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+
 	// ---------------------------------------------------------------
 
 	public GnuCashTransactionSplit.Action     action;
 	public GnuCashTransactionSplit.ReconState reconState;
 	
-	public GCshAcctID          acctID;
+	public GCshAcctID       acctID;
 	
 	public GnuCashAccount.Type acctType;
 	
@@ -48,12 +51,12 @@ public class TransactionSplitFilter_FP {
 		
 		acctType = null;
 		
-		valueFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
-		valueTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+		valueFrom = UNSET_VALUE.copy();
+		valueTo   = UNSET_VALUE.copy();
 		valueAbs  = false;
 		
-		quantityFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
-		quantityTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+		quantityFrom = UNSET_VALUE.copy();
+		quantityTo   = UNSET_VALUE.copy();
 		quantityAbs  = false;
 		
 		descrPart = "";
@@ -67,12 +70,12 @@ public class TransactionSplitFilter_FP {
 
 		acctType = null;
 
-		valueFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
-		valueTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+		valueFrom = UNSET_VALUE.copy();
+		valueTo   = UNSET_VALUE.copy();
 		valueAbs  = false;
 
-		quantityFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
-		quantityTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+		quantityFrom = UNSET_VALUE.copy();
+		quantityTo   = UNSET_VALUE.copy();
 		quantityAbs  = false;
 		
 		descrPart = "";
@@ -93,6 +96,10 @@ public class TransactionSplitFilter_FP {
 			// as values returned are *not* standardized:
 			String actionStr = splt.getActionStr();
 			if ( actionStr == null ) {
+				return false;
+			}
+
+			if ( actionStr.trim().equals("") ) {
 				return false;
 			}
 
@@ -136,11 +143,11 @@ public class TransactionSplitFilter_FP {
 		
 		// ---
 		
-		if ( valueFrom.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
+		if ( ! valueFrom.equals(UNSET_VALUE) ) {
 			FixedPointNumber val = splt.getValue();
 			if ( valueAbs && 
-				 val.isNegative() ) {
-				val.negate();
+				 val.compareTo(FixedPointNumber.ZERO) < 0 ) {
+				val.negate(); // mutable
 			}
 			
 			if ( val.isLessThan(valueFrom, Const.DIFF_TOLERANCE_VALUE ) ) {
@@ -148,11 +155,11 @@ public class TransactionSplitFilter_FP {
 			}
 		}
 		
-		if ( valueTo.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
+		if ( ! valueTo.equals(UNSET_VALUE) ) {
 			FixedPointNumber val = splt.getValue();
 			if ( valueAbs && 
-				 val.isNegative() ) {
-				val.negate();
+				 val.compareTo(FixedPointNumber.ZERO) < 0 ) {
+				val.negate(); // mutable
 			}
 			
 			if ( val.isGreaterThan(valueTo, Const.DIFF_TOLERANCE_VALUE ) ) {
@@ -162,26 +169,26 @@ public class TransactionSplitFilter_FP {
 		
 		// ---
 		
-		if ( quantityFrom.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
+		if ( ! quantityFrom.equals(UNSET_VALUE) ) {
 			FixedPointNumber qty = splt.getQuantity();
 			if ( quantityAbs && 
-				 qty.isNegative() ) {
-				qty.negate();
+				 qty.compareTo(FixedPointNumber.ZERO) < 0 ) {
+				qty.negate(); // mutable
 			}
 			
-			if ( qty.isLessThan(quantityFrom, Const.DIFF_TOLERANCE_VALUE ) ) {
+			if ( qty.isLessThan(quantityFrom, Const.DIFF_TOLERANCE_VALUE) ) {
 				return false;
 			}
 		}
 		
-		if ( quantityTo.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
+		if ( ! quantityTo.equals(UNSET_VALUE) ) {
 			FixedPointNumber qty = splt.getQuantity();
 			if ( quantityAbs && 
-				 qty.isNegative() ) {
-				qty.negate();
+				 qty.compareTo(FixedPointNumber.ZERO) < 0 ) {
+				qty.negate(); // mutable
 			}
 			
-			if ( qty.isGreaterThan(quantityTo, Const.DIFF_TOLERANCE_VALUE ) ) {
+			if ( qty.isGreaterThan(quantityTo, Const.DIFF_TOLERANCE_VALUE)) {
 				return false;
 			}
 		}

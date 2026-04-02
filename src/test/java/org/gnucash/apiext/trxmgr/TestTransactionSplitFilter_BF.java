@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.net.URL;
 
+import org.apache.commons.numbers.fraction.BigFraction;
 import org.gnucash.api.read.GnuCashFile;
 import org.gnucash.api.read.GnuCashTransactionSplit;
 import org.gnucash.api.read.impl.GnuCashFileImpl;
@@ -15,9 +16,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import junit.framework.JUnit4TestAdapter;
-import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
-public class TestTransactionSplitFilter {
+public class TestTransactionSplitFilter_BF {
 	
 	public static final GCshSpltID TRXSPLT_1_ID = new GCshSpltID("b6a88c1d918e465892488c561e02831a");
 	public static final GCshSpltID TRXSPLT_2_ID = new GCshSpltID("980706f1ead64460b8205f093472c855");
@@ -31,7 +31,7 @@ public class TestTransactionSplitFilter {
 	// -----------------------------------------------------------------
 
 	private GnuCashFile gcshFile = null;
-	private TransactionSplitFilter_FP flt = null;
+	private TransactionSplitFilter_BF flt = null;
 	private GnuCashTransactionSplit splt = null;
 
 	// -----------------------------------------------------------------
@@ -42,7 +42,7 @@ public class TestTransactionSplitFilter {
 
 	@SuppressWarnings("exports")
 	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(TestTransactionSplitFilter.class);
+		return new JUnit4TestAdapter(TestTransactionSplitFilter_BF.class);
 	}
 
 	@Before
@@ -72,7 +72,7 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test01() throws Exception {
-		flt = new TransactionSplitFilter_FP();
+		flt = new TransactionSplitFilter_BF();
 		flt.acctID.set(ACCT_1_ID);
 		splt = gcshFile.getTransactionSplitByID(TRXSPLT_1_ID);
 		
@@ -84,119 +84,119 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test02_1() throws Exception {
-		flt = new TransactionSplitFilter_FP();
+		flt = new TransactionSplitFilter_BF();
 		flt.acctID.set(ACCT_1_ID);
-		flt.valueFrom = new FixedPointNumber("-2253.00");
-		flt.valueTo = new FixedPointNumber("-2253.00");
+		flt.valueFrom = BigFraction.of(-2253);
+		flt.valueTo = BigFraction.of(-2253);
 		splt = gcshFile.getTransactionSplitByID(TRXSPLT_1_ID);
 		
 		assertEquals(true, flt.matchesCriteria(splt));
 		
-		flt.valueFrom = new FixedPointNumber("-2253.01");
-		flt.valueTo = new FixedPointNumber("-2253.01");
+		flt.valueFrom = BigFraction.of(-225301, 100);
+		flt.valueTo = BigFraction.of(-225301, 100);
 		assertEquals(false, flt.matchesCriteria(splt));
 		
-		flt.valueFrom = new FixedPointNumber("-2254.00");
-		flt.valueTo = new FixedPointNumber("-2252.00");
+		flt.valueFrom = BigFraction.of(-2254);
+		flt.valueTo = BigFraction.of(-2252);
 		assertEquals(true, flt.matchesCriteria(splt));
 		
-		flt.valueFrom = new FixedPointNumber("-2252.00");
-		flt.valueTo = new FixedPointNumber("-2254.00");
+		flt.valueFrom = BigFraction.of(-2252);
+		flt.valueTo = BigFraction.of(-2254);
 		assertEquals(false, flt.matchesCriteria(splt));
 	}
 
 	@Test
 	public void test02_2() throws Exception {
-		flt = new TransactionSplitFilter_FP();
+		flt = new TransactionSplitFilter_BF();
 		flt.acctID.set(ACCT_7_ID);
-		flt.valueFrom = new FixedPointNumber("-2253.00");
-		flt.valueTo = new FixedPointNumber("2253.00");
+		flt.valueFrom = BigFraction.of(-2253);
+		flt.valueTo = BigFraction.of(2253);
 		splt = gcshFile.getTransactionSplitByID(TRXSPLT_2_ID);
 		
 		assertEquals(true, flt.matchesCriteria(splt));
 		
-		flt.valueFrom = new FixedPointNumber("2253.01");
-		flt.valueTo = new FixedPointNumber("2253.01");
+		flt.valueFrom = BigFraction.of(225301, 100);
+		flt.valueTo = BigFraction.of(225301, 100);
 		assertEquals(false, flt.matchesCriteria(splt));
 		
-		flt.valueFrom = new FixedPointNumber("2252.00");
-		flt.valueTo = new FixedPointNumber("2254.00");
+		flt.valueFrom = BigFraction.of(2252);
+		flt.valueTo = BigFraction.of(2254);
 		assertEquals(true, flt.matchesCriteria(splt));
 		
-		flt.valueFrom = new FixedPointNumber("2255.00");
-		flt.valueTo = new FixedPointNumber("2252.00");
+		flt.valueFrom = BigFraction.of(2255);
+		flt.valueTo = BigFraction.of(2252);
 		assertEquals(false, flt.matchesCriteria(splt));
 
-		// CAUTION: tolerance
-		flt.valueFrom = new FixedPointNumber("2252.99");
-		flt.valueTo = new FixedPointNumber("2252.9999");
-		assertEquals(true, flt.matchesCriteria(splt)); // sic
+		// CAUTION: No tolerance here, as opposed to FP variant
+		flt.valueFrom = BigFraction.of(225299, 100);
+		flt.valueTo = BigFraction.of(22529999, 10000);
+		assertEquals(false, flt.matchesCriteria(splt));
 
-		// CAUTION: tolerance
-		flt.valueFrom = new FixedPointNumber("2253.0001");
-		flt.valueTo = new FixedPointNumber("2254");
-		assertEquals(true, flt.matchesCriteria(splt)); // sic
+		// CAUTION: No tolerance here, as opposed to FP variant
+		flt.valueFrom = BigFraction.of(22530001, 10000);
+		flt.valueTo = BigFraction.of(2254);
+		assertEquals(false, flt.matchesCriteria(splt));
 	}
 
 	@Test
 	public void test03_1() throws Exception {
-		flt = new TransactionSplitFilter_FP();
+		flt = new TransactionSplitFilter_BF();
 		flt.acctID.set(ACCT_1_ID);
-		flt.quantityFrom = new FixedPointNumber("-2253.00");
-		flt.quantityTo = new FixedPointNumber("-2253.00");
+		flt.quantityFrom = BigFraction.of(-2253);
+		flt.quantityTo = BigFraction.of(-2253);
 		splt = gcshFile.getTransactionSplitByID(TRXSPLT_1_ID);
 		
 		assertEquals(true, flt.matchesCriteria(splt));
 		
-		flt.quantityFrom = new FixedPointNumber("-2253.01");
-		flt.quantityTo = new FixedPointNumber("-2253.01");
+		flt.quantityFrom = BigFraction.of(-225301, 100);
+		flt.quantityTo = BigFraction.of(-225301, 100);
 		assertEquals(false, flt.matchesCriteria(splt));
 		
-		flt.quantityFrom = new FixedPointNumber("-2254.00");
-		flt.quantityTo = new FixedPointNumber("-2252.00");
+		flt.quantityFrom = BigFraction.of(-2254);
+		flt.quantityTo = BigFraction.of(-2252);
 		assertEquals(true, flt.matchesCriteria(splt));
 		
-		flt.quantityFrom = new FixedPointNumber("-2252.00");
-		flt.quantityTo = new FixedPointNumber("-2254.00");
+		flt.quantityFrom = BigFraction.of(-2252);
+		flt.quantityTo = BigFraction.of(-2254);
 		assertEquals(false, flt.matchesCriteria(splt));
 	}
 
 	@Test
 	public void test03_2() throws Exception {
-		flt = new TransactionSplitFilter_FP();
+		flt = new TransactionSplitFilter_BF();
 		flt.acctID.set(ACCT_7_ID);
-		flt.quantityFrom = new FixedPointNumber("100.0000");
-		flt.quantityTo = new FixedPointNumber("100.0000");
+		flt.quantityFrom = BigFraction.of(100);
+		flt.quantityTo = BigFraction.of(100);
 		splt = gcshFile.getTransactionSplitByID(TRXSPLT_2_ID);
 		
 		assertEquals(true, flt.matchesCriteria(splt));
 		
-		flt.quantityFrom = new FixedPointNumber("100.00");
-		flt.quantityTo = new FixedPointNumber("100.01");
+		flt.quantityFrom = BigFraction.of(100);
+		flt.quantityTo = BigFraction.of(10001, 100);
 		assertEquals(true, flt.matchesCriteria(splt));
 		
-		flt.quantityFrom = new FixedPointNumber("99.99");
-		flt.quantityTo = new FixedPointNumber("100.00");
+		flt.quantityFrom = BigFraction.of(9999, 100);
+		flt.quantityTo = BigFraction.of(100);
 		assertEquals(true, flt.matchesCriteria(splt));
 		
-		flt.quantityFrom = new FixedPointNumber("100.00");
-		flt.quantityTo = new FixedPointNumber("99.99");
+		flt.quantityFrom = BigFraction.of(100);
+		flt.quantityTo = BigFraction.of(9999, 100);
 		assertEquals(false, flt.matchesCriteria(splt));
 		
-		// CAUTION: tolerance
-		flt.quantityFrom = new FixedPointNumber("99.99");
-		flt.quantityTo = new FixedPointNumber("99.9999");
-		assertEquals(true, flt.matchesCriteria(splt)); // sic
+		// CAUTION: No tolerance here, as opposed to FP variant
+		flt.quantityFrom = BigFraction.of(9999, 100);
+		flt.quantityTo = BigFraction.of(999999, 10000);
+		assertEquals(false, flt.matchesCriteria(splt));
 		
-		// CAUTION: tolerance
-		flt.quantityFrom = new FixedPointNumber("100.0001");
-		flt.quantityTo = new FixedPointNumber("101");
-		assertEquals(true, flt.matchesCriteria(splt)); // sic
+		// CAUTION: No tolerance here, as opposed to FP variant
+		flt.quantityFrom = BigFraction.of(1000001, 10000);
+		flt.quantityTo = BigFraction.of(101);
+		assertEquals(false, flt.matchesCriteria(splt));
 	}
 	
 	@Test
 	public void test04() throws Exception {
-		flt = new TransactionSplitFilter_FP();
+		flt = new TransactionSplitFilter_BF();
 		flt.acctID.set(ACCT_7_ID);
 		flt.action = GnuCashTransactionSplit.Action.BUY;
 		splt = gcshFile.getTransactionSplitByID(TRXSPLT_2_ID);
@@ -209,7 +209,7 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test05() throws Exception {
-		flt = new TransactionSplitFilter_FP();
+		flt = new TransactionSplitFilter_BF();
 		flt.acctID.set(ACCT_7_ID);
 		flt.descrPart = ""; // sic, the TRANSACTION's description is set, not the SPLIT's one
 		splt = gcshFile.getTransactionSplitByID(TRXSPLT_2_ID);

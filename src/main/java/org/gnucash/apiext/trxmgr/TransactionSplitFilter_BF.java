@@ -1,7 +1,5 @@
 package org.gnucash.apiext.trxmgr;
 
-import java.math.BigDecimal;
-
 import org.apache.commons.numbers.fraction.BigFraction;
 import org.gnucash.api.read.GnuCashAccount;
 import org.gnucash.api.read.GnuCashTransactionSplit;
@@ -9,16 +7,17 @@ import org.gnucash.api.read.impl.GnuCashTransactionSplitImpl;
 import org.gnucash.apiext.Const;
 import org.gnucash.base.basetypes.simple.GCshAcctID;
 
-import xyz.schnorxoborx.base.numbers.FixedPointNumber;
-
 public class TransactionSplitFilter_BF {
+	
+	// a bit bulky, I admit...
+	private static final BigFraction UNSET_VALUE = TransactionSplitFilter_FP.UNSET_VALUE.toBigFraction();
 
 	// ---------------------------------------------------------------
 
 	public GnuCashTransactionSplit.Action     action;
 	public GnuCashTransactionSplit.ReconState reconState;
 	
-	public GCshAcctID          acctID;
+	public GCshAcctID       acctID;
 	
 	public GnuCashAccount.Type acctType;
 	
@@ -49,13 +48,12 @@ public class TransactionSplitFilter_BF {
 		
 		acctType = null;
 		
-		// a bit bulky, I admit...
-		valueFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
-		valueTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
+		valueFrom = UNSET_VALUE;
+		valueTo   = UNSET_VALUE;
 		valueAbs  = false;
 		
-		quantityFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
-		quantityTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
+		quantityFrom = UNSET_VALUE;
+		quantityTo   = UNSET_VALUE;
 		quantityAbs  = false;
 		
 		descrPart = "";
@@ -69,13 +67,12 @@ public class TransactionSplitFilter_BF {
 
 		acctType = null;
 
-		// a bit bulky, I admit...
-		valueFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
-		valueTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
+		valueFrom = UNSET_VALUE;
+		valueTo   = UNSET_VALUE;
 		valueAbs  = false;
 
-		quantityFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
-		quantityTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE)).toBigFraction();
+		quantityFrom = UNSET_VALUE;
+		quantityTo   = UNSET_VALUE;
 		quantityAbs  = false;
 		
 		descrPart = "";
@@ -96,6 +93,10 @@ public class TransactionSplitFilter_BF {
 			// as values returned are *not* standardized:
 			String actionStr = splt.getActionStr();
 			if ( actionStr == null ) {
+				return false;
+			}
+
+			if ( actionStr.trim().equals("") ) {
 				return false;
 			}
 
@@ -139,52 +140,64 @@ public class TransactionSplitFilter_BF {
 		
 		// ---
 		
-		if ( valueFrom.bigDecimalValue().doubleValue() != Const.UNSET_VALUE ) {
-			FixedPointNumber val = splt.getValue();
+		if ( ! valueFrom.equals(UNSET_VALUE) ) {
+			BigFraction val = splt.getValueRat();
 			if ( valueAbs && 
-				 val.isNegative() ) {
-				val.negate();
+				 val.compareTo(BigFraction.ZERO) < 0 ) {
+				val = val.negate(); // immutable
 			}
 			
-			if ( val.isLessThan(valueFrom, Const.DIFF_TOLERANCE_VALUE ) ) {
+			// CAUTION: Will not work due to bug in BigFraction.compareTo()
+			// if ( val.compareTo(valueFrom) < 0 ) {
+			// Instead:
+			if ( valueFrom.subtract(val).compareTo(BigFraction.ZERO) > 0 ) {
 				return false;
 			}
 		}
 		
-		if ( valueTo.bigDecimalValue().doubleValue() != Const.UNSET_VALUE ) {
-			FixedPointNumber val = splt.getValue();
+		if ( ! valueTo.equals(UNSET_VALUE) ) {
+			BigFraction val = splt.getValueRat();
 			if ( valueAbs && 
-				 val.isNegative() ) {
-				val.negate();
+				 val.compareTo(BigFraction.ZERO) < 0 ) {
+				val = val.negate(); // immutable
 			}
 			
-			if ( val.isGreaterThan(valueTo, Const.DIFF_TOLERANCE_VALUE ) ) {
+			// CAUTION: Will not work due to bug in BigFraction.compareTo()
+			// if ( val.compareTo(valueTo) > 0 ) {
+			// Instead:
+			if ( valueTo.subtract(val).compareTo(BigFraction.ZERO) < 0 ) {
 				return false;
 			}
 		}
 		
 		// ---
 		
-		if ( quantityFrom.bigDecimalValue().doubleValue() != Const.UNSET_VALUE ) {
-			FixedPointNumber qty = splt.getQuantity();
+		if ( ! quantityFrom.equals(UNSET_VALUE) ) {
+			BigFraction qty = splt.getQuantityRat();
 			if ( quantityAbs && 
-				 qty.isNegative() ) {
-				qty.negate();
+				 qty.compareTo(BigFraction.ZERO) < 0 ) {
+				qty = qty.negate(); // immutable
 			}
 			
-			if ( qty.isLessThan(quantityFrom, Const.DIFF_TOLERANCE_VALUE ) ) {
+			// CAUTION: Will not work due to bug in BigFraction.compareTo()
+			// if ( qty.compareTo(quantityFrom) < 0 ) {
+			// Instead:
+			if ( quantityFrom.subtract(qty).compareTo(BigFraction.ZERO) > 0 ) {
 				return false;
 			}
 		}
 		
-		if ( quantityTo.bigDecimalValue().doubleValue() != Const.UNSET_VALUE ) {
-			FixedPointNumber qty = splt.getQuantity();
+		if ( ! quantityTo.equals(UNSET_VALUE) ) {
+			BigFraction qty = splt.getQuantityRat();
 			if ( quantityAbs && 
-				 qty.isNegative() ) {
-				qty.negate();
+				 qty.compareTo(BigFraction.ZERO) < 0 ) {
+				qty = qty.negate(); // immutable
 			}
 			
-			if ( qty.isGreaterThan(quantityTo, Const.DIFF_TOLERANCE_VALUE ) ) {
+			// CAUTION: Will not work due to bug in BigFraction.compareTo()
+			// if ( qty.compareTo(quantityTo) > 0 ) {
+			// Instead:
+			if ( quantityTo.subtract(qty).compareTo(BigFraction.ZERO) < 0 ) {
 				return false;
 			}
 		}

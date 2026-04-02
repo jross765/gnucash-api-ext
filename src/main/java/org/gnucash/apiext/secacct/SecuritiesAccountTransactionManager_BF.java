@@ -139,11 +139,11 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	AcctIDAmountBFPair newPair = new AcctIDAmountBFPair(taxFeeAcctID, taxesFees);
     	expensesAcctAmtList.add(newPair);
-    	
+
     	return genBuyStockTrx(gcshFile, 
-    			      stockAcctID, expensesAcctAmtList, offsetAcctID, 
-    			      nofStocks, stockPrc, 
-    			      postDate, descr);	
+    				stockAcctID, expensesAcctAmtList, offsetAcctID, 
+    				nofStocks, stockPrc, 
+    				postDate, descr);	
     }
     
     /**
@@ -237,6 +237,7 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	// ---
     	// Check account types
+
     	GnuCashAccount stockAcct  = gcshFile.getAccountByID(stockAcctID);
     	if ( stockAcct.getType() != GnuCashAccount.Type.STOCK ) {
     		throw new IllegalArgumentException("Account with ID " + stockAcctID + " is not of type " + GnuCashAccount.Type.STOCK);
@@ -256,7 +257,7 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	// ---
 
-    	BigFraction amtNet   = nofStocks.multiply(stockPrc);
+    	BigFraction amtNet = nofStocks.multiply(stockPrc); // immutable
     	LOGGER.debug("genBuyStockTrx: Net amount: " + amtNet);
 
     	BigFraction amtGross = amtNet;
@@ -303,10 +304,10 @@ public class SecuritiesAccountTransactionManager_BF {
     	genTrx.setDateEntered(LocalDateTime.now());
 
     	LOGGER.info("genBuyStockTrx: Generated new (generic) Transaction: " + genTrx.getID());
-    	
+
     	// ---
 
-		GnuCashStockBuyTransactionImpl specTrxRO = null;
+	GnuCashStockBuyTransactionImpl specTrxRO = null;
     	try {
     		specTrxRO = new GnuCashStockBuyTransactionImpl((GnuCashWritableTransactionImpl) genTrx);
     	} catch ( Exception exc ) {
@@ -479,6 +480,7 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	// ---
     	// Check account types
+
     	GnuCashAccount stockAcct  = gcshFile.getAccountByID(stockAcctID);
     	if ( stockAcct.getType() != GnuCashAccount.Type.STOCK ) {
     		throw new IllegalArgumentException("Account with ID " + stockAcctID + " is not of type " + GnuCashAccount.Type.STOCK);
@@ -516,7 +518,7 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	GnuCashWritableTransaction genTrx = gcshFile.createWritableTransaction();
     	genTrx.setDescription(descr);
-    	
+
     	// ---
 
     	GnuCashWritableTransactionSplit splt1 = genTrx.createWritableSplit(stockAcct);
@@ -560,7 +562,7 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	// ---
 
-		GnuCashStockDividendTransactionImpl specTrxRO = null;
+	GnuCashStockDividendTransactionImpl specTrxRO = null;
     	try {
     		specTrxRO = new GnuCashStockDividendTransactionImpl((GnuCashWritableTransactionImpl) genTrx);
     	} catch ( Exception exc ) {
@@ -653,17 +655,20 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
-    	if ( factor.compareTo(SPLIT_FACTOR_MIN) < 0 ) {
+    	// CAUTION: the following line is written so oddly because of a bug in BigFraction.compareTo()
+	if ( SPLIT_FACTOR_MIN.subtract(factor).compareTo(BigFraction.ZERO) > 0 ) {
     		throw new IllegalArgumentException("argument <factor> has unplausible value (smaller than " + SPLIT_FACTOR_MIN + ")");
     	}
 
     	// ::TODO: cf. above
-    	if ( factor.compareTo(SPLIT_FACTOR_MAX) > 0 ) {
+    	// CAUTION: the following line is written so oddly because of a bug in BigFraction.compareTo()
+    	if ( SPLIT_FACTOR_MAX.subtract(factor).compareTo(BigFraction.ZERO) < 0 ) {
     		throw new IllegalArgumentException("argument <factor> has unplausible value (greater than " + SPLIT_FACTOR_MAX + ")");
     	}
 
     	// ---
     	// Check account type
+
     	GnuCashAccount stockAcct  = gcshFile.getAccountByID(stockAcctID);
     	if ( stockAcct == null ) {
     		throw new IllegalStateException("Could not find account with that ID");
@@ -744,16 +749,18 @@ public class SecuritiesAccountTransactionManager_BF {
     		throw new IllegalArgumentException("argument <nofAddShares> is = 0");
     	}
 
-    	BigFraction nofAddSharesAbs = nofAddShares.abs();
+    	BigFraction nofAddSharesAbs = nofAddShares.abs(); // immutable
     	
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
-    	if ( nofAddSharesAbs.compareTo(SPLIT_NOF_ADD_SHARES_MIN) < 0 ) {
+    	// CAUTION: the following line is written so oddly because of a bug in BigFraction.compareTo()
+    	if ( SPLIT_NOF_ADD_SHARES_MIN.subtract(nofAddSharesAbs).compareTo(BigFraction.ZERO) > 0 ) {
     		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. smaller than " + SPLIT_NOF_ADD_SHARES_MIN + ")");
     	}
 
     	// ::TODO: Cf. above
-    	if ( nofAddSharesAbs.compareTo(SPLIT_NOF_ADD_SHARES_MAX) > 0 ) {
+    	// CAUTION: the following line is written so oddly because of a bug in BigFraction.compareTo()
+    	if ( SPLIT_NOF_ADD_SHARES_MAX.subtract(nofAddSharesAbs).compareTo(BigFraction.ZERO) < 0 ) {
     		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. greater than " + SPLIT_NOF_ADD_SHARES_MAX + ")");
     	}
 
@@ -782,7 +789,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	
     	BigFraction nofSharesOld = stockAcct.getBalanceRat(postDate);
     	LOGGER.debug("genStockSplitTrx_nofShares: Old no. of shares: " + nofSharesOld);
-    	if ( nofSharesOld.equals(BigDecimal.ZERO) ) {
+    	if ( nofSharesOld.equals(BigFraction.ZERO) ) {
     		throw new IllegalStateException("No. of old shares is zero. Cannot carry out a split.");
     	}
     	BigFraction nofSharesNew = nofSharesOld.add(nofAddShares);

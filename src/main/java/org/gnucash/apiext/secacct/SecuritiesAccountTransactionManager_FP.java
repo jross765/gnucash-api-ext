@@ -140,11 +140,11 @@ public class SecuritiesAccountTransactionManager_FP {
 
     	AcctIDAmountFPPair newPair = new AcctIDAmountFPPair(taxFeeAcctID, taxesFees);
     	expensesAcctAmtList.add(newPair);
-    	
+
     	return genBuyStockTrx(gcshFile, 
-    			      stockAcctID, expensesAcctAmtList, offsetAcctID, 
-    			      nofStocks, stockPrc, 
-    			      postDate, descr);	
+    				stockAcctID, expensesAcctAmtList, offsetAcctID, 
+    				nofStocks, stockPrc, 
+    				postDate, descr);	
     }
     
     /**
@@ -238,6 +238,7 @@ public class SecuritiesAccountTransactionManager_FP {
 
     	// ---
     	// Check account types
+
     	GnuCashAccount stockAcct  = gcshFile.getAccountByID(stockAcctID);
     	if ( stockAcct.getType() != GnuCashAccount.Type.STOCK ) {
     		throw new IllegalArgumentException("Account with ID " + stockAcctID + " is not of type " + GnuCashAccount.Type.STOCK);
@@ -257,7 +258,7 @@ public class SecuritiesAccountTransactionManager_FP {
 
     	// ---
 
-    	FixedPointNumber amtNet   = nofStocks.copy().multiply(stockPrc);
+    	FixedPointNumber amtNet = nofStocks.copy().multiply(stockPrc); // mutable
     	LOGGER.debug("genBuyStockTrx: Net amount: " + amtNet);
 
     	FixedPointNumber amtGross = amtNet.copy();
@@ -304,10 +305,10 @@ public class SecuritiesAccountTransactionManager_FP {
     	genTrx.setDateEntered(LocalDateTime.now());
 
     	LOGGER.info("genBuyStockTrx: Generated new (generic) Transaction: " + genTrx.getID());
-    	
+
     	// ---
 
-		GnuCashStockBuyTransactionImpl specTrxRO = null;
+	GnuCashStockBuyTransactionImpl specTrxRO = null;
     	try {
     		specTrxRO = new GnuCashStockBuyTransactionImpl((GnuCashWritableTransactionImpl) genTrx);
     	} catch ( Exception exc ) {
@@ -480,6 +481,7 @@ public class SecuritiesAccountTransactionManager_FP {
 
     	// ---
     	// Check account types
+
     	GnuCashAccount stockAcct  = gcshFile.getAccountByID(stockAcctID);
     	if ( stockAcct.getType() != GnuCashAccount.Type.STOCK ) {
     		throw new IllegalArgumentException("Account with ID " + stockAcctID + " is not of type " + GnuCashAccount.Type.STOCK);
@@ -504,7 +506,7 @@ public class SecuritiesAccountTransactionManager_FP {
 
     	// ---
 
-    	FixedPointNumber expensesSum = new FixedPointNumber();
+    	FixedPointNumber expensesSum = FixedPointNumber.ZERO.copy();
     	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		expensesSum.add(elt.amount()); // mutable
     	}
@@ -517,7 +519,7 @@ public class SecuritiesAccountTransactionManager_FP {
 
     	GnuCashWritableTransaction genTrx = gcshFile.createWritableTransaction();
     	genTrx.setDescription(descr);
-    	
+
     	// ---
 
     	GnuCashWritableTransactionSplit splt1 = genTrx.createWritableSplit(stockAcct);
@@ -561,7 +563,7 @@ public class SecuritiesAccountTransactionManager_FP {
 
     	// ---
 
-		GnuCashStockDividendTransactionImpl specTrxRO = null;
+	GnuCashStockDividendTransactionImpl specTrxRO = null;
     	try {
     		specTrxRO = new GnuCashStockDividendTransactionImpl((GnuCashWritableTransactionImpl) genTrx);
     	} catch ( Exception exc ) {
@@ -648,18 +650,22 @@ public class SecuritiesAccountTransactionManager_FP {
     		throw new IllegalArgumentException("argument <factor> is null");
     	}
 
-    	if ( factor.compareTo(FixedPointNumber.ZERO) <= 0 ) {
-    		throw new IllegalArgumentException("argument <factor> is <= 0");
+    	if ( factor.isNegative() ) {
+    		throw new IllegalArgumentException("argument <factor> is < 0");
+    	}
+
+    	if ( factor.equals(FixedPointNumber.ZERO) ) {
+    		throw new IllegalArgumentException("argument <factor> is = 0");
     	}
 
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
-    	if ( factor.compareTo(SPLIT_FACTOR_MIN) < 0 ) {
+    	if ( factor.isLessThan(SPLIT_FACTOR_MIN) ) {
     		throw new IllegalArgumentException("argument <factor> has unplausible value (smaller than " + SPLIT_FACTOR_MIN + ")");
     	}
 
     	// ::TODO: cf. above
-    	if ( factor.compareTo(SPLIT_FACTOR_MAX) > 0 ) {
+    	if ( factor.isGreaterThan(SPLIT_FACTOR_MAX) ) {
     		throw new IllegalArgumentException("argument <factor> has unplausible value (greater than " + SPLIT_FACTOR_MAX + ")");
     	}
 
@@ -745,16 +751,16 @@ public class SecuritiesAccountTransactionManager_FP {
     		throw new IllegalArgumentException("argument <nofAddShares> is = 0");
     	}
 
-    	FixedPointNumber nofAddSharesAbs = new FixedPointNumber( nofAddShares.copy().abs() ); // mutable
+    	FixedPointNumber nofAddSharesAbs = nofAddShares.copy().abs(); // mutable
     	
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
-    	if ( nofAddSharesAbs.compareTo(SPLIT_NOF_ADD_SHARES_MIN) < 0 ) {
+    	if ( nofAddSharesAbs.isLessThan(SPLIT_NOF_ADD_SHARES_MIN) ) {
     		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. smaller than " + SPLIT_NOF_ADD_SHARES_MIN + ")");
     	}
 
     	// ::TODO: Cf. above
-    	if ( nofAddSharesAbs.compareTo(SPLIT_NOF_ADD_SHARES_MAX) > 0 ) {
+    	if ( nofAddSharesAbs.isGreaterThan(SPLIT_NOF_ADD_SHARES_MAX) ) {
     		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. greater than " + SPLIT_NOF_ADD_SHARES_MAX + ")");
     	}
 
@@ -769,6 +775,7 @@ public class SecuritiesAccountTransactionManager_FP {
 
     	// ---
     	// Check account type
+
     	GnuCashAccount stockAcct  = gcshFile.getAccountByID(stockAcctID);
     	if ( stockAcct == null ) {
     		throw new IllegalStateException("Could not find account with that ID");
@@ -783,7 +790,7 @@ public class SecuritiesAccountTransactionManager_FP {
     	
     	FixedPointNumber nofSharesOld = stockAcct.getBalance(postDate);
     	LOGGER.debug("genStockSplitTrx_nofShares: Old no. of shares: " + nofSharesOld);
-    	if ( nofSharesOld.equals(BigDecimal.ZERO) ) {
+    	if ( nofSharesOld.equals(FixedPointNumber.ZERO) ) {
     		throw new IllegalStateException("No. of old shares is zero. Cannot carry out a split.");
     	}
     	FixedPointNumber nofSharesNew = nofSharesOld.copy().add(nofAddShares);
