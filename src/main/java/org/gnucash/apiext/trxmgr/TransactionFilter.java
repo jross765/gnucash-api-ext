@@ -158,7 +158,7 @@ public class TransactionFilter {
 		
 		// ---
 		
-		if ( ! descrPart.trim().equals("") ) {
+		if ( ! descrPart.isBlank() ) {
 			if ( trx.getDescription() != null ) {
 				if ( ! trx.getDescription().toLowerCase().contains(descrPart.trim().toLowerCase()) ) {
 					return false;
