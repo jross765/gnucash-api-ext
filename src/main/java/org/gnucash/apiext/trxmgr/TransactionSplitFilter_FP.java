@@ -10,6 +10,7 @@ import org.gnucash.base.basetypes.simple.GCshAcctID;
 
 import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
+@Deprecated
 public class TransactionSplitFilter_FP {
 
 	// a bit bulky, I admit...
@@ -36,6 +37,7 @@ public class TransactionSplitFilter_FP {
 	
 	// ---------------------------------------------------------------
 	
+	@Deprecated
 	public TransactionSplitFilter_FP() {
 		init();
 		reset();
@@ -62,6 +64,7 @@ public class TransactionSplitFilter_FP {
 		descrPart = "";
 	}
 	
+	@Deprecated
 	public void reset() {
 		action = null;
 		reconState = null;
@@ -83,6 +86,7 @@ public class TransactionSplitFilter_FP {
 	
 	// ---------------------------------------------------------------
 	
+	@Deprecated
 	public boolean matchesCriteria(final GnuCashTransactionSplit splt) {
 		
 		if ( splt == null ) {
@@ -211,6 +215,7 @@ public class TransactionSplitFilter_FP {
 	// ---------------------------------------------------------------
 	
 	@Override
+	@Deprecated
 	public String toString() {
 		return "TransactionSplitFilter [" + 
 	                 "action=" + action + ", " +

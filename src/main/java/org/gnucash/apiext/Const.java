@@ -11,7 +11,9 @@ public class Const {
   
   // ---
   
-  public static final double UNSET_VALUE = -999999.99; 
+  public static final double UNSET_VALUE       = -999999.99; 
+  public static final int    UNSET_VALUE_NUM   = -99999999; 
+  public static final int    UNSET_VALUE_DENOM = 100; 
 
   // ---
   

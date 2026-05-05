@@ -1,6 +1,5 @@
 package org.gnucash.apiext.secacct;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,6 +34,7 @@ import xyz.schnorxoborx.base.numbers.FixedPointNumber;
  * These methods are sort of "macros" for the low-level access functions
  * in the "API" module.
  */
+@Deprecated
 public class SecuritiesAccountTransactionManager_FP {
     
     public enum Type {
@@ -116,7 +116,8 @@ public class SecuritiesAccountTransactionManager_FP {
      * 
      * @see #genBuyStockTrx(GnuCashWritableFileImpl, GCshAcctID, Collection, GCshAcctID, FixedPointNumber, FixedPointNumber, LocalDate, String)
      */
-    public static GnuCashWritableStockBuyTransaction genBuyStockTrx(
+    @Deprecated
+	public static GnuCashWritableStockBuyTransaction genBuyStockTrx(
     		final GnuCashWritableFileImpl gcshFile,
     		final GCshAcctID stockAcctID,
     		final GCshAcctID taxFeeAcctID,
@@ -169,7 +170,8 @@ public class SecuritiesAccountTransactionManager_FP {
      * 
      * @see #genBuyStockTrx(GnuCashWritableFileImpl, GCshAcctID, GCshAcctID, GCshAcctID, FixedPointNumber, FixedPointNumber, FixedPointNumber, LocalDate, String)
      */
-    public static GnuCashWritableStockBuyTransaction genBuyStockTrx(
+    @Deprecated
+	public static GnuCashWritableStockBuyTransaction genBuyStockTrx(
     		final GnuCashWritableFileImpl gcshFile,
     		final GCshAcctID stockAcctID,
     		final Collection<AcctIDAmountFPPair> expensesAcctAmtList,
@@ -350,7 +352,8 @@ public class SecuritiesAccountTransactionManager_FP {
      * @param descr description of the transaction
      * @return a newly generated, modifiable transaction object
      */
-    public static GnuCashWritableStockDividendTransaction genDividDistribTrx(
+    @Deprecated
+	public static GnuCashWritableStockDividendTransaction genDividDistribTrx(
     	    final GnuCashWritableFileImpl gcshFile,
     	    final GCshAcctID stockAcctID,
     	    final GCshAcctID incomeAcctID,
@@ -404,7 +407,8 @@ public class SecuritiesAccountTransactionManager_FP {
      * @param descr description of the transaction
      * @return a newly generated, modifiable transaction object
      */
-    public static GnuCashWritableStockDividendTransaction genDividDistribTrx(
+    @Deprecated
+	public static GnuCashWritableStockDividendTransaction genDividDistribTrx(
     	    final GnuCashWritableFileImpl gcshFile,
     	    final GCshAcctID stockAcctID,
     	    final GCshAcctID incomeAcctID,
@@ -585,7 +589,8 @@ public class SecuritiesAccountTransactionManager_FP {
 
     // ---------------------------------------------------------------
     
-    public static GnuCashWritableStockSplitTransaction genStockSplitTrx(
+    @Deprecated
+	public static GnuCashWritableStockSplitTransaction genStockSplitTrx(
     		final GnuCashWritableFileImpl gcshFile,
     		final GCshAcctID stockAcctID,
     		final StockSplitVar var,
@@ -628,7 +633,8 @@ public class SecuritiesAccountTransactionManager_FP {
      * @see #genStockSplitTrx_nofShares(GnuCashWritableFileImpl, GCshAcctID, FixedPointNumber, LocalDate, String)
      * @see #genStockSplitTrx(GnuCashWritableFileImpl, GCshAcctID, StockSplitVar, FixedPointNumber, LocalDate, String)
      */
-    public static GnuCashWritableStockSplitTransaction genStockSplitTrx_factor(
+    @Deprecated
+	public static GnuCashWritableStockSplitTransaction genStockSplitTrx_factor(
     		final GnuCashWritableFileImpl gcshFile,
     		final GCshAcctID stockAcctID,
     		final FixedPointNumber factor,
@@ -720,7 +726,8 @@ public class SecuritiesAccountTransactionManager_FP {
      * @see #genStockSplitTrx_factor(GnuCashWritableFileImpl, GCshAcctID, FixedPointNumber, LocalDate, String)
      * @see #genStockSplitTrx(GnuCashWritableFileImpl, GCshAcctID, StockSplitVar, FixedPointNumber, LocalDate, String)
      */
-    public static GnuCashWritableStockSplitTransaction genStockSplitTrx_nofShares(
+    @Deprecated
+	public static GnuCashWritableStockSplitTransaction genStockSplitTrx_nofShares(
     	    final GnuCashWritableFileImpl gcshFile,
     	    final GCshAcctID stockAcctID,
     	    final FixedPointNumber nofAddShares, // use neg. number in case of reverse stock-split
