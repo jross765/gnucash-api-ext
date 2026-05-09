@@ -6,18 +6,18 @@
 	<parent>
 		<groupId>org.gnucash</groupId>
 		<artifactId>gnucash</artifactId>
-		<version>2026-04</version>
+		<version>2026-06</version>
 	</parent>
 
 	<artifactId>gnucash-api-ext</artifactId>
 	<name>${project.title} : API Extensions</name>
-	<version>1.8</version>
+	<version>1.9</version>
 
 	<properties>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<schnorxolib-base-systemPath>/home/xxx/Programme-ProdReady/basicstuff/schnorxolib/schnorxolib-base-0.2.jar</schnorxolib-base-systemPath>
+		<schnorxolib-base-systemPath>/home/xxx/Programme-ProdReady/basicstuff/schnorxolib/schnorxolib-base-0.3.jar</schnorxolib-base-systemPath>
 
 	</properties>
 
@@ -37,7 +37,7 @@
 			<dependency>
 				<groupId>org.gnucash</groupId>
 				<artifactId>gnucash-base</artifactId>
-				<version>1.8</version>
+				<version>1.9</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -45,7 +45,7 @@
 			<dependency>
 				<groupId>org.gnucash</groupId>
 				<artifactId>gnucash-api</artifactId>
-				<version>1.8</version>
+				<version>1.9</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -53,7 +53,7 @@
 			<dependency>
 				<groupId>org.gnucash</groupId>
 				<artifactId>gnucash-api-spec</artifactId>
-				<version>0.3</version>
+				<version>0.4</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -71,7 +71,7 @@
 		<dependency>
 			<groupId>xyz.schnorxoborx.schnorxolib</groupId>
 			<artifactId>schnorxolib-base</artifactId>
-			<version>0.2</version>
+			<version>0.3</version>
 			<scope>system</scope>
 			<systemPath>${schnorxolib-base-systemPath}</systemPath>
 		</dependency>
@@ -82,7 +82,7 @@
 		<dependency>
 			<groupId>org.gnucash</groupId>
 			<artifactId>gnucash-base</artifactId>
-			<version>1.8</version>
+			<version>1.9</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -90,7 +90,7 @@
 		<dependency>
 			<groupId>org.gnucash</groupId>
 			<artifactId>gnucash-api</artifactId>
-			<version>1.8</version>
+			<version>1.9</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -98,7 +98,7 @@
 		<dependency>
 			<groupId>org.gnucash</groupId>
 			<artifactId>gnucash-api-spec</artifactId>
-			<version>0.3</version>
+			<version>0.4</version>
 			<scope>compile</scope>
 		</dependency>
 
