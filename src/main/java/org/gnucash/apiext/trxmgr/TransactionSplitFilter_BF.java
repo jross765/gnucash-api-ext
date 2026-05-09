@@ -9,7 +9,7 @@ import org.gnucash.base.basetypes.simple.GCshAcctID;
 
 public class TransactionSplitFilter_BF {
 	
-	private static final BigFraction UNSET_VALUE = BigFraction.of(Const.UNSET_VALUE_NUM, Const.UNSET_VALUE_DENOM);
+	private static final BigFraction UNSET_VALUE = Const.UNSET_VALUE_BF;
 
 	// ---------------------------------------------------------------
 
@@ -222,7 +222,7 @@ public class TransactionSplitFilter_BF {
 	public String toString() {
 		return "TransactionSplitFilter [" + 
 	                 "action=" + action + ", " +
-		         "recon-state=" + reconState + ", " +
+		        "recon-state=" + reconState + ", " +
 
 				     "acctID=" + acctID + ", " +
 				     
