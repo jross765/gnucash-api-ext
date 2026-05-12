@@ -3,13 +3,12 @@ package org.gnucash.apiext.secacct;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.numbers.fraction.BigFraction;
 import org.gnucash.api.read.GnuCashAccount;
 import org.gnucash.api.read.GnuCashFile;
 import org.gnucash.base.basetypes.simple.GCshAcctID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
 public class SecuritiesAccountManager {
 
@@ -85,7 +84,7 @@ public class SecuritiesAccountManager {
     	
     	for ( GnuCashAccount acct : getAllShareAccts() ) {
     		if ( ! acct.isHidden() &&
-    			 acct.getBalance().isGreaterThan(FixedPointNumber.ZERO) ) {
+    			 acct.getBalanceRat().compareTo(BigFraction.ZERO) > 0 ) {
     			result.add(acct);
     		}
     	}

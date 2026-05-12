@@ -2,6 +2,7 @@ package org.gnucash.apiext.trxmgr;
 
 import java.util.ArrayList;
 
+import org.apache.commons.numbers.fraction.BigFraction;
 import org.gnucash.api.read.GnuCashAccount;
 import org.gnucash.api.read.GnuCashTransaction;
 import org.gnucash.api.read.GnuCashTransactionSplit;
@@ -10,8 +11,6 @@ import org.gnucash.apiext.Const;
 import org.gnucash.base.basetypes.simple.GCshTrxID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
 public class TransactionManager {
 	
@@ -39,9 +38,9 @@ public class TransactionManager {
 		if ( trx.getSplits().size() == 0 )
 			return false;
 		
-		FixedPointNumber sum = new FixedPointNumber();
+		BigFraction sum = BigFraction.ZERO;
 		for ( GnuCashTransactionSplit splt : trx.getSplits() ) {
-			sum.add(splt.getValue());
+			sum = sum.add(splt.getValueRat());
 		}
 		
 		if ( sum.abs().doubleValue() > Const.DIFF_TOLERANCE_VALUE ) {

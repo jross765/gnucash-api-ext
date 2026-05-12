@@ -120,7 +120,7 @@ public class TransactionFilter {
 					return false;
 				}
 			}
-		
+
 			if ( isDatePostedToSet() ) {
 				if ( trx.getDatePosted().toLocalDate().isAfter(datePostedTo) ) {
 					return false;

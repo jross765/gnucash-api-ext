@@ -2,6 +2,7 @@ package org.gnucash.apiext.trxmgr;
 
 import java.util.ArrayList;
 
+import org.apache.commons.numbers.fraction.BigFraction;
 import org.gnucash.api.read.GnuCashAccount;
 import org.gnucash.api.read.GnuCashTransaction;
 import org.gnucash.api.read.GnuCashTransactionSplit;
@@ -11,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import xyz.schnorxoborx.base.dateutils.JulianDate;
-import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
 public abstract class TransactionMergerBase {
 	
@@ -164,61 +164,61 @@ public abstract class TransactionMergerBase {
 		
 		// Level 3:
 		// Split values are identical
-		FixedPointNumber sumSurv = new FixedPointNumber();
+		BigFraction sumSurv = BigFraction.ZERO;
 		for ( GnuCashTransactionSplit elt : spltListSurvBank ) {
-			sumSurv = sumSurv.add(elt.getValue());
+			sumSurv = sumSurv.add(elt.getValueRat());
 		}
 		
-		FixedPointNumber sumDier = new FixedPointNumber();
+		BigFraction sumDier = BigFraction.ZERO;
 		for ( GnuCashTransactionSplit elt : spltListDierBank ) {
-			sumDier = sumDier.add(elt.getValue());
+			sumDier = sumDier.add(elt.getValueRat());
 		}
 		
-		if ( Math.abs( sumSurv.getBigDecimal().doubleValue() - 
-				       sumDier.getBigDecimal().doubleValue() ) > Const.DIFF_TOLERANCE_VALUE ) {
+		if ( Math.abs( sumSurv.bigDecimalValue().doubleValue() - 
+				       sumDier.bigDecimalValue().doubleValue() ) > Const.DIFF_TOLERANCE_VALUE ) {
 			LOGGER.warn("plausiCheck: Split-sums over survivor- and dier-splits are unequal (bank accounts)");
-			LOGGER.debug("plausiCheck: sumSurv: " + sumSurv.getBigDecimal());
-			LOGGER.debug("plausiCheck: sumDier: " + sumDier.getBigDecimal());
+			LOGGER.debug("plausiCheck: sumSurv: " + sumSurv.bigDecimalValue());
+			LOGGER.debug("plausiCheck: sumDier: " + sumDier.bigDecimalValue());
 			return false;
 		}
 		
 		// ---
 		
-		sumSurv = new FixedPointNumber();
+		sumSurv = BigFraction.ZERO;
 		for ( GnuCashTransactionSplit elt : spltListSurvCash ) {
-			sumSurv = sumSurv.add(elt.getValue());
+			sumSurv = sumSurv.add(elt.getValueRat());
 		}
 		
-		sumDier = new FixedPointNumber();
+		sumDier = BigFraction.ZERO;
 		for ( GnuCashTransactionSplit elt : spltListDierCash ) {
-			sumDier = sumDier.add(elt.getValue());
+			sumDier = sumDier.add(elt.getValueRat());
 		}
 		
-		if ( Math.abs( sumSurv.getBigDecimal().doubleValue() - 
-				       sumDier.getBigDecimal().doubleValue() ) > Const.DIFF_TOLERANCE_VALUE ) {
+		if ( Math.abs( sumSurv.bigDecimalValue().doubleValue() - 
+				       sumDier.bigDecimalValue().doubleValue() ) > Const.DIFF_TOLERANCE_VALUE ) {
 			LOGGER.warn("plausiCheck: Split-sums over survivor- and dier-splits are unequal (cash accounts)");
-			LOGGER.debug("plausiCheck: sumSurv: " + sumSurv.getBigDecimal());
-			LOGGER.debug("plausiCheck: sumDier: " + sumDier.getBigDecimal());
+			LOGGER.debug("plausiCheck: sumSurv: " + sumSurv.bigDecimalValue());
+			LOGGER.debug("plausiCheck: sumDier: " + sumDier.bigDecimalValue());
 			return false;
 		}
 		
 		// ---
 		
-		sumSurv = new FixedPointNumber();
+		sumSurv = BigFraction.ZERO;
 		for ( GnuCashTransactionSplit elt : spltListSurvStock ) {
-			sumSurv = sumSurv.add(elt.getValue());
+			sumSurv = sumSurv.add(elt.getValueRat());
 		}
 		
-		sumDier = new FixedPointNumber();
+		sumDier = BigFraction.ZERO;
 		for ( GnuCashTransactionSplit elt : spltListDierStock ) {
-			sumDier = sumDier.add(elt.getValue());
+			sumDier = sumDier.add(elt.getValueRat());
 		}
 		
-		if ( Math.abs( sumSurv.getBigDecimal().doubleValue() - 
-				       sumDier.getBigDecimal().doubleValue() ) > Const.DIFF_TOLERANCE_VALUE ) {
+		if ( Math.abs( sumSurv.bigDecimalValue().doubleValue() - 
+				       sumDier.bigDecimalValue().doubleValue() ) > Const.DIFF_TOLERANCE_VALUE ) {
 			LOGGER.warn("plausiCheck: Split-sums over survivor- and dier-splits are unequal (stock accounts)");
-			LOGGER.debug("plausiCheck: sumSurv: " + sumSurv.getBigDecimal());
-			LOGGER.debug("plausiCheck: sumDier: " + sumDier.getBigDecimal());
+			LOGGER.debug("plausiCheck: sumSurv: " + sumSurv.bigDecimalValue());
+			LOGGER.debug("plausiCheck: sumDier: " + sumDier.bigDecimalValue());
 			return false;
 		}
 		

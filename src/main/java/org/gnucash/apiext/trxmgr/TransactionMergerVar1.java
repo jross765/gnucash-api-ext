@@ -14,7 +14,7 @@ public class TransactionMergerVar1 extends TransactionMergerBase
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionMergerVar1.class);
     
     // ---------------------------------------------------------------
-    
+
 	public TransactionMergerVar1(GnuCashWritableFile gcshFile) {
 		super(gcshFile);
 		setVar(Var.VAR_1);

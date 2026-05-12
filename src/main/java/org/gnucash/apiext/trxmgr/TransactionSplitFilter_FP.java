@@ -219,7 +219,7 @@ public class TransactionSplitFilter_FP {
 	public String toString() {
 		return "TransactionSplitFilter [" + 
 	                 "action=" + action + ", " +
-		         "recon-state=" + reconState + ", " +
+				"recon-state=" + reconState + ", " +
 
 				     "acctID=" + acctID + ", " +
 				     

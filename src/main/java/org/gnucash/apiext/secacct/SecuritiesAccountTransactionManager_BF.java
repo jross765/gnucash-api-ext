@@ -441,7 +441,7 @@ public class SecuritiesAccountTransactionManager_BF {
     			
     	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
-			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
+    			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
     		}
     		if ( ! elt.isSet() ) {
     			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is not set");
@@ -561,7 +561,7 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	// ---
 
-	GnuCashStockDividendTransactionImpl specTrxRO = null;
+    	GnuCashStockDividendTransactionImpl specTrxRO = null;
     	try {
     		specTrxRO = new GnuCashStockDividendTransactionImpl((GnuCashWritableTransactionImpl) genTrx);
     	} catch ( Exception exc ) {
@@ -654,14 +654,12 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
-    	// CAUTION: the following line is written so oddly because of a bug in BigFraction.compareTo()
-	if ( SPLIT_FACTOR_MIN.subtract(factor).compareTo(BigFraction.ZERO) > 0 ) {
+    	if ( factor.compareTo(SPLIT_FACTOR_MIN) < 0 ) {
     		throw new IllegalArgumentException("argument <factor> has unplausible value (smaller than " + SPLIT_FACTOR_MIN + ")");
     	}
 
     	// ::TODO: cf. above
-    	// CAUTION: the following line is written so oddly because of a bug in BigFraction.compareTo()
-    	if ( SPLIT_FACTOR_MAX.subtract(factor).compareTo(BigFraction.ZERO) < 0 ) {
+    	if ( factor.compareTo(SPLIT_FACTOR_MAX) > 0 ) {
     		throw new IllegalArgumentException("argument <factor> has unplausible value (greater than " + SPLIT_FACTOR_MAX + ")");
     	}
 
@@ -752,14 +750,12 @@ public class SecuritiesAccountTransactionManager_BF {
     	
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
-    	// CAUTION: the following line is written so oddly because of a bug in BigFraction.compareTo()
-    	if ( SPLIT_NOF_ADD_SHARES_MIN.subtract(nofAddSharesAbs).compareTo(BigFraction.ZERO) > 0 ) {
+    	if ( nofAddShares.compareTo(SPLIT_NOF_ADD_SHARES_MIN) < 0 ) {
     		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. smaller than " + SPLIT_NOF_ADD_SHARES_MIN + ")");
     	}
 
     	// ::TODO: Cf. above
-    	// CAUTION: the following line is written so oddly because of a bug in BigFraction.compareTo()
-    	if ( SPLIT_NOF_ADD_SHARES_MAX.subtract(nofAddSharesAbs).compareTo(BigFraction.ZERO) < 0 ) {
+    	if ( nofAddShares.compareTo(SPLIT_NOF_ADD_SHARES_MAX) > 0 ) {
     		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. greater than " + SPLIT_NOF_ADD_SHARES_MAX + ")");
     	}
 
@@ -774,6 +770,7 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	// ---
     	// Check account type
+
     	GnuCashAccount stockAcct  = gcshFile.getAccountByID(stockAcctID);
     	if ( stockAcct == null ) {
     		throw new IllegalStateException("Could not find account with that ID");

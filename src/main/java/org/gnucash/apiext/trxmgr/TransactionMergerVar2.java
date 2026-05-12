@@ -158,7 +158,7 @@ public class TransactionMergerVar2 extends TransactionMergerBase
 			copy.setAction(zDierTrxBankSplt.getAction());
 		copy.setAccountID(zSurvTrxBankSpltBefore.getAccountID());
 		copy.setValue(zDierTrxBankSplt.getValue().negate());
-		copy.setQuantity(zDierTrxBankSplt.getQuantity().negate());
+		copy.setQuantity(zDierTrxBankSplt.getQuantityRat().negate());
 		copy.setDescription(zDierTrxBankSplt.getDescription());
 		
 		// User-defined attributes

@@ -447,7 +447,7 @@ public class SecuritiesAccountTransactionManager_FP {
     			
     	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
-			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
+    			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
     		}
     		if ( ! elt.isSet() ) {
     			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is not set");
@@ -567,7 +567,7 @@ public class SecuritiesAccountTransactionManager_FP {
 
     	// ---
 
-	GnuCashStockDividendTransactionImpl specTrxRO = null;
+    	GnuCashStockDividendTransactionImpl specTrxRO = null;
     	try {
     		specTrxRO = new GnuCashStockDividendTransactionImpl((GnuCashWritableTransactionImpl) genTrx);
     	} catch ( Exception exc ) {
@@ -656,12 +656,8 @@ public class SecuritiesAccountTransactionManager_FP {
     		throw new IllegalArgumentException("argument <factor> is null");
     	}
 
-    	if ( factor.isNegative() ) {
-    		throw new IllegalArgumentException("argument <factor> is < 0");
-    	}
-
-    	if ( factor.equals(FixedPointNumber.ZERO) ) {
-    		throw new IllegalArgumentException("argument <factor> is = 0");
+    	if ( factor.compareTo(FixedPointNumber.ZERO) <= 0 ) {
+    		throw new IllegalArgumentException("argument <factor> is <= 0");
     	}
 
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
@@ -677,6 +673,7 @@ public class SecuritiesAccountTransactionManager_FP {
 
     	// ---
     	// Check account type
+
     	GnuCashAccount stockAcct  = gcshFile.getAccountByID(stockAcctID);
     	if ( stockAcct == null ) {
     		throw new IllegalStateException("Could not find account with that ID");
