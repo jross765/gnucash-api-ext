@@ -197,10 +197,13 @@ public class SecuritiesAccountTransactionManager_FP {
     	if ( expensesAcctAmtList == null ) {
     		throw new IllegalArgumentException("argument <expensesAcctAmtList> is null");
     	}
-			
-    	if ( expensesAcctAmtList.isEmpty() ) {
-    		throw new IllegalArgumentException("argument <expensesAcctAmtList> is empty");
-    	}
+
+    	// Sic, there are cases where no expenses are paid (in fiat);
+    	// e.g.: Crypto transactions (where fees are paid in crypto,
+    	// thus contained in parameter <nofStocks>).
+//    	if ( expensesAcctAmtList.isEmpty() ) {
+//    		throw new IllegalArgumentException("argument <expensesAcctAmtList> is empty");
+//    	}
 			
     	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
@@ -438,12 +441,9 @@ public class SecuritiesAccountTransactionManager_FP {
     		throw new IllegalArgumentException("argument <expensesAcctAmtList> is null");
     	}
 
-    	// CAUTION: Yes, this actually happens in real life, e.g. with specifics 
-    	// of German tax law (Freibetrag, Kapitalausschuettung).
-    	// ==> The following check is commented out on purpose.
-//    	if ( expensesAcctAmtList.isEmpty() ) {
-//    	    throw new IllegalArgumentException("empty expenses account list given");
-//    	}
+    	if ( expensesAcctAmtList.isEmpty() ) {
+    	    throw new IllegalArgumentException("empty expenses account list given");
+    	}
     			
     	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {

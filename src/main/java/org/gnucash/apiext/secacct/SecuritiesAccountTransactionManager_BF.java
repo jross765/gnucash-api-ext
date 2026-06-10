@@ -193,10 +193,14 @@ public class SecuritiesAccountTransactionManager_BF {
     	if ( expensesAcctAmtList == null ) {
     		throw new IllegalArgumentException("argument <expensesAcctAmtList> is null");
     	}
-			
-    	if ( expensesAcctAmtList.isEmpty() ) {
-    		throw new IllegalArgumentException("argument <expensesAcctAmtList> is empty");
-    	}
+
+    	// Sic, there are cases where no expenses are paid (in fiat);
+    	// e.g.: Crypto transactions (where fees are paid in crypto,
+    	// thus contained in parameter <nofStocks>).
+	// ==> The following check is commented out on purpose.
+//    	if ( expensesAcctAmtList.isEmpty() ) {
+//    		throw new IllegalArgumentException("argument <expensesAcctAmtList> is empty");
+//    	}
 			
     	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
@@ -432,9 +436,9 @@ public class SecuritiesAccountTransactionManager_BF {
     		throw new IllegalArgumentException("argument <expensesAcctAmtList> is null");
     	}
 
-    	// CAUTION: Yes, this actually happens in real life, e.g. with specifics 
-    	// of German tax law (Freibetrag, Kapitalausschuettung).
-    	// ==> The following check is commented out on purpose.
+    	// Sic, there are cases where no expenses are paid for a dividend,
+	// e.g. with specifics of German tax law (Freibetrag, Kapitalausschuettung).
+	// ==> The following check is commented out on purpose.
 //    	if ( expensesAcctAmtList.isEmpty() ) {
 //    	    throw new IllegalArgumentException("empty expenses account list given");
 //    	}
@@ -738,6 +742,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	}
 
     	// CAUTION: Neg. no. of add. shares is allowed (reverse split)!
+	// ==> The following check is commented out on purpose.
 //    	if ( nofAddShares.compareTo(BigFraction.ZERO) < 0 ) {
 //    		throw new IllegalArgumentException("negative no. of add. shares given");
 //    	}
@@ -750,12 +755,12 @@ public class SecuritiesAccountTransactionManager_BF {
     	
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
-    	if ( nofAddShares.compareTo(SPLIT_NOF_ADD_SHARES_MIN) < 0 ) {
+    	if ( nofAddSharesAbs.compareTo(SPLIT_NOF_ADD_SHARES_MIN) < 0 ) {
     		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. smaller than " + SPLIT_NOF_ADD_SHARES_MIN + ")");
     	}
 
     	// ::TODO: Cf. above
-    	if ( nofAddShares.compareTo(SPLIT_NOF_ADD_SHARES_MAX) > 0 ) {
+    	if ( nofAddSharesAbs.compareTo(SPLIT_NOF_ADD_SHARES_MAX) > 0 ) {
     		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. greater than " + SPLIT_NOF_ADD_SHARES_MAX + ")");
     	}
 
