@@ -22,13 +22,13 @@ import org.gnucash.api.read.impl.GnuCashFileImpl;
 import org.gnucash.api.read.impl.GnuCashTransactionImpl;
 import org.gnucash.api.write.impl.GnuCashWritableFileImpl;
 import org.gnucash.apiext.ConstTest;
-import org.gnucash.apispec.read.GnuCashStockBuyTransaction;
+import org.gnucash.apispec.read.GnuCashStockBuySellTransaction;
 import org.gnucash.apispec.read.GnuCashStockDividendTransaction;
 import org.gnucash.apispec.read.GnuCashStockSplitTransaction;
-import org.gnucash.apispec.read.impl.GnuCashStockBuyTransactionImpl;
+import org.gnucash.apispec.read.impl.GnuCashStockBuySellTransactionImpl;
 import org.gnucash.apispec.read.impl.GnuCashStockDividendTransactionImpl;
 import org.gnucash.apispec.read.impl.GnuCashStockSplitTransactionImpl;
-import org.gnucash.apispec.write.GnuCashWritableStockBuyTransaction;
+import org.gnucash.apispec.write.GnuCashWritableStockBuySellTransaction;
 import org.gnucash.apispec.write.GnuCashWritableStockDividendTransaction;
 import org.gnucash.apispec.write.GnuCashWritableStockSplitTransaction;
 import org.gnucash.base.basetypes.simple.GCshAcctID;
@@ -147,7 +147,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 	public void test01() throws Exception {
 		test01_initExpAccts();
 
-		GnuCashWritableStockBuyTransaction trx = 
+		GnuCashWritableStockBuySellTransaction trx = 
 				SecuritiesAccountTransactionManager_BF
 					.genBuyStockTrx(gcshInFile, 
 									STOCK_ACCT_ID, EXPENSES_ACCT_AMT_LIST, OFFSET_ACCT_ID,
@@ -179,7 +179,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		GnuCashTransaction genTrx = gcshOutFile.getTransactionByID(newTrxID);
 		assertNotEquals(null, genTrx);
 
-		GnuCashStockBuyTransaction specTrxRO = new GnuCashStockBuyTransactionImpl((GnuCashTransactionImpl) genTrx);
+		GnuCashStockBuySellTransaction specTrxRO = new GnuCashStockBuySellTransactionImpl((GnuCashTransactionImpl) genTrx);
 		assertNotEquals(null, specTrxRO);
 		assertEquals(newTrxID, specTrxRO.getID());
 

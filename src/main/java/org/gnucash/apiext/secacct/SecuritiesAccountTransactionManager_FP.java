@@ -11,13 +11,13 @@ import org.gnucash.api.write.GnuCashWritableTransaction;
 import org.gnucash.api.write.GnuCashWritableTransactionSplit;
 import org.gnucash.api.write.impl.GnuCashWritableFileImpl;
 import org.gnucash.api.write.impl.GnuCashWritableTransactionImpl;
-import org.gnucash.apispec.read.impl.GnuCashStockBuyTransactionImpl;
+import org.gnucash.apispec.read.impl.GnuCashStockBuySellTransactionImpl;
 import org.gnucash.apispec.read.impl.GnuCashStockDividendTransactionImpl;
 import org.gnucash.apispec.read.impl.GnuCashStockSplitTransactionImpl;
-import org.gnucash.apispec.write.GnuCashWritableStockBuyTransaction;
+import org.gnucash.apispec.write.GnuCashWritableStockBuySellTransaction;
 import org.gnucash.apispec.write.GnuCashWritableStockDividendTransaction;
 import org.gnucash.apispec.write.GnuCashWritableStockSplitTransaction;
-import org.gnucash.apispec.write.impl.GnuCashWritableStockBuyTransactionImpl;
+import org.gnucash.apispec.write.impl.GnuCashWritableStockBuySellTransactionImpl;
 import org.gnucash.apispec.write.impl.GnuCashWritableStockDividendTransactionImpl;
 import org.gnucash.apispec.write.impl.GnuCashWritableStockSplitTransactionImpl;
 import org.gnucash.base.basetypes.simple.GCshAcctID;
@@ -117,7 +117,7 @@ public class SecuritiesAccountTransactionManager_FP {
      * @see #genBuyStockTrx(GnuCashWritableFileImpl, GCshAcctID, Collection, GCshAcctID, FixedPointNumber, FixedPointNumber, LocalDate, String)
      */
     @Deprecated
-	public static GnuCashWritableStockBuyTransaction genBuyStockTrx(
+	public static GnuCashWritableStockBuySellTransaction genBuyStockTrx(
     		final GnuCashWritableFileImpl gcshFile,
     		final GCshAcctID stockAcctID,
     		final GCshAcctID taxFeeAcctID,
@@ -171,7 +171,7 @@ public class SecuritiesAccountTransactionManager_FP {
      * @see #genBuyStockTrx(GnuCashWritableFileImpl, GCshAcctID, GCshAcctID, GCshAcctID, FixedPointNumber, FixedPointNumber, FixedPointNumber, LocalDate, String)
      */
     @Deprecated
-	public static GnuCashWritableStockBuyTransaction genBuyStockTrx(
+	public static GnuCashWritableStockBuySellTransaction genBuyStockTrx(
     		final GnuCashWritableFileImpl gcshFile,
     		final GCshAcctID stockAcctID,
     		final Collection<AcctIDAmountFPPair> expensesAcctAmtList,
@@ -313,17 +313,17 @@ public class SecuritiesAccountTransactionManager_FP {
 
     	// ---
 
-	GnuCashStockBuyTransactionImpl specTrxRO = null;
+	GnuCashStockBuySellTransactionImpl specTrxRO = null;
     	try {
-    		specTrxRO = new GnuCashStockBuyTransactionImpl((GnuCashWritableTransactionImpl) genTrx);
+    		specTrxRO = new GnuCashStockBuySellTransactionImpl((GnuCashWritableTransactionImpl) genTrx);
     	} catch ( Exception exc ) {
         	LOGGER.error("genBuyStockTrx: Could not convert generic transaction to specialized one (1): " + genTrx.getID());
         	throw exc;
     	}
     	
-    	GnuCashWritableStockBuyTransaction specTrxRW = null;
+    	GnuCashWritableStockBuySellTransaction specTrxRW = null;
     	try {
-        	specTrxRW = new GnuCashWritableStockBuyTransactionImpl(specTrxRO);
+        	specTrxRW = new GnuCashWritableStockBuySellTransactionImpl(specTrxRO);
         	LOGGER.info("genBuyStockTrx: Generated new (specialized) Transaction: " + specTrxRW.getID());
     	} catch ( Exception exc ) {
         	LOGGER.error("genBuyStockTrx: Could not convert generic transaction to specialized one (2): " + genTrx.getID());

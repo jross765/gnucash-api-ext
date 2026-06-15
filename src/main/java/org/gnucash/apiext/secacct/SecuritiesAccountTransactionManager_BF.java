@@ -12,14 +12,18 @@ import org.gnucash.api.write.GnuCashWritableTransaction;
 import org.gnucash.api.write.GnuCashWritableTransactionSplit;
 import org.gnucash.api.write.impl.GnuCashWritableFileImpl;
 import org.gnucash.api.write.impl.GnuCashWritableTransactionImpl;
-import org.gnucash.apispec.read.impl.GnuCashStockBuyTransactionImpl;
+import org.gnucash.apispec.read.impl.GnuCashStockBuySellTransactionImpl;
 import org.gnucash.apispec.read.impl.GnuCashStockDividendTransactionImpl;
 import org.gnucash.apispec.read.impl.GnuCashStockSplitTransactionImpl;
+import org.gnucash.apispec.write.GnuCashWritableStockBuySellTransaction;
 import org.gnucash.apispec.write.GnuCashWritableStockBuyTransaction;
 import org.gnucash.apispec.write.GnuCashWritableStockDividendTransaction;
+import org.gnucash.apispec.write.GnuCashWritableStockSellTransaction;
 import org.gnucash.apispec.write.GnuCashWritableStockSplitTransaction;
+import org.gnucash.apispec.write.impl.GnuCashWritableStockBuySellTransactionImpl;
 import org.gnucash.apispec.write.impl.GnuCashWritableStockBuyTransactionImpl;
 import org.gnucash.apispec.write.impl.GnuCashWritableStockDividendTransactionImpl;
+import org.gnucash.apispec.write.impl.GnuCashWritableStockSellTransactionImpl;
 import org.gnucash.apispec.write.impl.GnuCashWritableStockSplitTransactionImpl;
 import org.gnucash.base.basetypes.simple.GCshAcctID;
 import org.gnucash.base.tuples.AcctIDAmountBFPair;
@@ -58,14 +62,14 @@ public class SecuritiesAccountTransactionManager_BF {
     // ::MAGIC
     private static BigFraction SPLIT_FACTOR_MIN = BigFraction.of(1, 20); 
     	// anything below that value is technically OK,
-        // but unplausible and thus forbidden.
+        // but implausible and thus forbidden.
     private static BigFraction SPLIT_FACTOR_MAX = BigFraction.of(20);
     	// accordingly
     
     // Notes: 
     //  - It is common to specify stock (reverse) splits by a factor (e.g., 2 for a 2-for-1 split,
     //    or 1/4 for 1-for-4 reverse split). So why use the number of add. shares? Because that
-    //    is how GnuCash handles things, as opposed to KMyMoney (cf. the sister project) , both 
+    //    is how GnuCash handles things, as opposed to GnuCash (cf. the sister project) , both 
     //    on the data and the GUI level, and given that we want to have both projects as symmetrical 
     //    as possible, we copy that logic here, so that the user can choose between both methods.
     //    Besides, the author has witnessed cases where the bank's statements provide wrong 
@@ -114,7 +118,7 @@ public class SecuritiesAccountTransactionManager_BF {
      * 
      * @see #genBuyStockTrx(GnuCashWritableFileImpl, GCshAcctID, Collection, GCshAcctID, BigFraction, BigFraction, LocalDate, String)
      */
-    public static GnuCashWritableStockBuyTransaction genBuyStockTrx(
+    public static GnuCashWritableStockBuySellTransaction genBuyStockTrx(
     		final GnuCashWritableFileImpl gcshFile,
     		final GCshAcctID stockAcctID,
     		final GCshAcctID taxFeeAcctID,
@@ -166,8 +170,133 @@ public class SecuritiesAccountTransactionManager_BF {
      * @return a newly generated, modifiable transaction object
      * 
      * @see #genBuyStockTrx(GnuCashWritableFileImpl, GCshAcctID, GCshAcctID, GCshAcctID, BigFraction, BigFraction, BigFraction, LocalDate, String)
+     * @see #genSellStockTrx(GnuCashWritableFileImpl, GCshAcctID, GCshAcctID, GCshAcctID, BigFraction, BigFraction, BigFraction, LocalDate, String)
+     * @see #genSellStockTrx(GnuCashWritableFileImpl, GCshAcctID, Collection, GCshAcctID, BigFraction, BigFraction, LocalDate, String)
      */
     public static GnuCashWritableStockBuyTransaction genBuyStockTrx(
+    		final GnuCashWritableFileImpl gcshFile,
+    		final GCshAcctID stockAcctID,
+    		final Collection<AcctIDAmountBFPair> expensesAcctAmtList,
+    		final GCshAcctID offsetAcctID,
+    		final BigFraction nofStocks,
+    		final BigFraction stockPrc,
+    		final LocalDate postDate,
+    		final String descr) {
+    	if ( nofStocks.doubleValue() <= 0.0 ) {
+    		throw new IllegalArgumentException("argument <nofStocks> is <= 0");
+    	}
+    	
+    	GnuCashWritableStockBuySellTransaction trx = 
+    			genBuySellStockTrxCore(gcshFile,
+    									stockAcctID, expensesAcctAmtList, offsetAcctID, 
+    									nofStocks, stockPrc,
+    									postDate, descr);
+    	
+    	return new GnuCashWritableStockBuyTransactionImpl((GnuCashWritableStockBuySellTransactionImpl) trx);
+    }
+    
+    // ---------------------------------------------------------------
+    
+    /**
+     * Generates a transaction that buys a given number of stocks  
+     * for a specific security's stock account at a given price, 
+     * and generates additional splits for taxes/fees
+     * (simple variant).
+     * 
+     * @param gcshFile GnuCash file
+     * @param stockAcctID ID the the stock account
+     * @param taxFeeAcctID ID of the expenses account for the taxes/fees
+     * @param offsetAcctID ID of the offsetting account
+     * (the account that the gross amount will be debited to).
+     * @param nofStocks no. of stocks bought
+     * @param stockPrc stock price (net)
+     * @param taxesFees taxes/fees
+     * @param postDate post date for transaction
+     * @param descr description of the transaction
+     * @return a newly generated, modifiable transaction object
+     * 
+     * @see #genSellStockTrx(GnuCashWritableFileImpl, GCshAcctID, Collection, GCshAcctID, BigFraction, BigFraction, LocalDate, String)
+     */
+    public static GnuCashWritableStockSellTransaction genSellStockTrx(
+    		final GnuCashWritableFileImpl gcshFile,
+    		final GCshAcctID stockAcctID,
+    		final GCshAcctID taxFeeAcctID,
+    		final GCshAcctID offsetAcctID,
+    		final BigFraction nofStocks,
+    		final BigFraction stockPrc,
+    		final BigFraction taxesFees,
+    		final LocalDate postDate,
+    		final String descr) {
+    	Collection<AcctIDAmountBFPair> expensesAcctAmtList = new ArrayList<AcctIDAmountBFPair>();
+	
+    	if ( taxesFees == null ) {
+    	    throw new IllegalArgumentException("argument <taxesFees> is null");
+    	}
+
+    	// CAUTION: The following two: In fact, this can happen
+    	// (negative booking after cancellation / Stornobuchung)
+	// if ( taxesFees.doubleValue() <= 0.0 ) {
+	//   throw new IllegalArgumentException("argument <taxesFees> has value <= 0.0");
+	// }
+
+    	AcctIDAmountBFPair newPair = new AcctIDAmountBFPair(taxFeeAcctID, taxesFees);
+    	expensesAcctAmtList.add(newPair);
+
+    	return genSellStockTrx(gcshFile, 
+    				stockAcctID, expensesAcctAmtList, offsetAcctID, 
+    				nofStocks, stockPrc, 
+    				postDate, descr);	
+    }
+    
+    /**
+     * Generates a transaction that buys a given number of stocks
+     * for a specific security's stock account at a given price, 
+     * and generates additional splits for taxes/fees
+     * (general variant).
+     * 
+     * @param gcshFile GnuCash file
+     * @param stockAcctID ID the the stock account
+     * @param expensesAcctAmtList list of pairs (acctID/amount)
+     * that represents all taxes / fees for this transaction
+     * (the account-IDs being the IDs of the according expenses
+     * accounts)  
+     * @param offsetAcctID ID of the offsetting account
+     * (the account that the gross amount will be debited to).
+     * @param nofStocks no. of stocks bought
+     * @param stockPrc stock price (net)
+     * @param postDate post date for transaction
+     * @param descr description of the transaction
+     * @return a newly generated, modifiable transaction object
+     * 
+     * @see #genSellStockTrx(GnuCashWritableFileImpl, GCshAcctID, GCshAcctID, GCshAcctID, BigFraction, BigFraction, BigFraction, LocalDate, String)
+     * @see #genBuyStockTrx(GnuCashWritableFileImpl, GCshAcctID, GCshAcctID, GCshAcctID, BigFraction, BigFraction, BigFraction, LocalDate, String)
+     * @see #genBuyStockTrx(GnuCashyWritableFileImpl, GCshAcctID, Collection, GCshAcctID, BigFraction, BigFraction, LocalDate, String)
+     */
+    public static GnuCashWritableStockSellTransaction genSellStockTrx(
+    		final GnuCashWritableFileImpl gcshFile,
+    		final GCshAcctID stockAcctID,
+    		final Collection<AcctIDAmountBFPair> expensesAcctAmtList,
+    		final GCshAcctID offsetAcctID,
+    		final BigFraction nofStocks,
+    		final BigFraction stockPrc,
+    		final LocalDate postDate,
+    		final String descr) {
+    	if ( nofStocks.doubleValue() <= 0.0 ) {
+    		throw new IllegalArgumentException("argument <nofStocks> is <= 0");
+    	}
+    	
+    	GnuCashWritableStockBuySellTransaction trx = 
+    			genBuySellStockTrxCore(gcshFile,
+    									stockAcctID, expensesAcctAmtList, offsetAcctID, 
+    									nofStocks.negate(), stockPrc,
+    									postDate, descr);
+    	
+    	return new GnuCashWritableStockSellTransactionImpl((GnuCashWritableStockBuySellTransactionImpl) trx);
+    }
+    
+    // ---------------------------------------------------------------
+
+    private static GnuCashWritableStockBuySellTransaction genBuySellStockTrxCore(
     		final GnuCashWritableFileImpl gcshFile,
     		final GCshAcctID stockAcctID,
     		final Collection<AcctIDAmountBFPair> expensesAcctAmtList,
@@ -216,11 +345,13 @@ public class SecuritiesAccountTransactionManager_BF {
     		throw new IllegalArgumentException("argument <nofStocks> or <stockPrc> is null");
     	}
 		
-    	if ( nofStocks.doubleValue() <= 0.0 ) {
-    		throw new IllegalArgumentException("argument <nofStocks> is <= 0");
+    	// Sic: Here, both positive and negative values that are valid.
+    	// But not zero.
+    	if ( nofStocks.compareTo(BigFraction.ZERO) == 0 ) {
+    		throw new IllegalArgumentException("argument <nofStocks> is = 0");
     	}
 			
-    	if ( stockPrc.doubleValue() <= 0.0 ) {
+    	if ( stockPrc.compareTo(BigFraction.ZERO) <= 0 ) {
     		throw new IllegalArgumentException("argument <stockPrc> is <= 0");
     	}
 	
@@ -230,13 +361,13 @@ public class SecuritiesAccountTransactionManager_BF {
     		}
     	}
 
-    	LOGGER.debug("genBuyStockTrx: Account 1 name (stock):      '" + gcshFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
+    	LOGGER.debug("genBuySellStockTrxCore: Account 1 name (stock): '" + gcshFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
     	int counter = 1;
     	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
-    		LOGGER.debug("genBuyStockTrx: Account 2." + counter + " name (expenses): '" + gcshFile.getAccountByID(elt.accountID()).getQualifiedName() + "'");
+    		LOGGER.debug("genBuySellStockTrxCore: Account 2." + counter + " name (expenses): '" + gcshFile.getAccountByID(elt.accountID()).getQualifiedName() + "'");
     		counter++;
     	}
-    	LOGGER.debug("genBuyStockTrx: Account 3 name (offsetting): '" + gcshFile.getAccountByID(offsetAcctID).getQualifiedName() + "'");
+    	LOGGER.debug("genBuySellStockTrxCore: Account 3 name (offsetting): '" + gcshFile.getAccountByID(offsetAcctID).getQualifiedName() + "'");
 
     	// ---
     	// Check account types
@@ -261,13 +392,13 @@ public class SecuritiesAccountTransactionManager_BF {
     	// ---
 
     	BigFraction amtNet = nofStocks.multiply(stockPrc); // immutable
-    	LOGGER.debug("genBuyStockTrx: Net amount: " + amtNet);
+    	LOGGER.debug("genBuySellStockTrxCore: Net amount: " + amtNet);
 
     	BigFraction amtGross = amtNet;
     	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		amtGross = amtGross.add(elt.amount()); // immutable
     	}
-    	LOGGER.debug("genBuyStockTrx: Gross amount: " + amtGross);
+    	LOGGER.debug("genBuySellStockTrxCore: Gross amount: " + amtGross);
 
     	// ---
 
@@ -279,7 +410,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	GnuCashWritableTransactionSplit splt1 = genTrx.createWritableSplit(offsetAcct);
     	splt1.setValue(amtGross.negate());
     	splt1.setQuantity(amtGross.negate());
-    	LOGGER.debug("genBuyStockTrx: Split 1 to write: " + splt1.toString());
+    	LOGGER.debug("genBuySellStockTrxCore: Split 1 to write: " + splt1.toString());
 
     	// ---
 	
@@ -287,7 +418,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	splt2.setValue(amtNet);
     	splt2.setQuantity(nofStocks);
     	splt2.setAction(GnuCashTransactionSplit.Action.BUY);
-    	LOGGER.debug("genBuyStockTrx: Split 2 to write: " + splt2.toString());
+    	LOGGER.debug("genBuySellStockTrxCore: Split 2 to write: " + splt2.toString());
 
     	// ---
 
@@ -297,7 +428,7 @@ public class SecuritiesAccountTransactionManager_BF {
     		GnuCashWritableTransactionSplit splt3 = genTrx.createWritableSplit(expensesAcct);
     		splt3.setValue(elt.amount());
     		splt3.setQuantity(elt.amount());
-    		LOGGER.debug("genBuyStockTrx: Split 3." + counter + " to write: " + splt3.toString());
+    		LOGGER.debug("genBuySellStockTrxCore: Split 3." + counter + " to write: " + splt3.toString());
     		counter++;
     	}
 
@@ -306,24 +437,24 @@ public class SecuritiesAccountTransactionManager_BF {
     	genTrx.setDatePosted(postDate);
     	genTrx.setDateEntered(LocalDateTime.now());
 
-    	LOGGER.info("genBuyStockTrx: Generated new (generic) Transaction: " + genTrx.getID());
+    	LOGGER.info("genBuySellStockTrxCore: Generated new (generic) Transaction: " + genTrx.getID());
 
     	// ---
 
-	GnuCashStockBuyTransactionImpl specTrxRO = null;
+	GnuCashStockBuySellTransactionImpl specTrxRO = null;
     	try {
-    		specTrxRO = new GnuCashStockBuyTransactionImpl((GnuCashWritableTransactionImpl) genTrx);
+    		specTrxRO = new GnuCashStockBuySellTransactionImpl((GnuCashWritableTransactionImpl) genTrx);
     	} catch ( Exception exc ) {
-        	LOGGER.error("genBuyStockTrx: Could not convert generic transaction to specialized one (1): " + genTrx.getID());
+        	LOGGER.error("genBuySellStockTrxCore: Could not convert generic transaction to specialized one (1): " + genTrx.getID());
         	throw exc;
     	}
     	
-    	GnuCashWritableStockBuyTransaction specTrxRW = null;
+    	GnuCashWritableStockBuySellTransaction specTrxRW = null;
     	try {
-        	specTrxRW = new GnuCashWritableStockBuyTransactionImpl(specTrxRO);
-        	LOGGER.info("genBuyStockTrx: Generated new (specialized) Transaction: " + specTrxRW.getID());
+        	specTrxRW = new GnuCashWritableStockBuySellTransactionImpl(specTrxRO);
+        	LOGGER.info("genBuySellStockTrxCore: Generated new (specialized) Transaction: " + specTrxRW.getID());
     	} catch ( Exception exc ) {
-        	LOGGER.error("genBuyStockTrx: Could not convert generic transaction to specialized one (2): " + genTrx.getID());
+        	LOGGER.error("genBuySellStockTrxCore: Could not convert generic transaction to specialized one (2): " + genTrx.getID());
         	throw exc;
     	}
     	
@@ -462,8 +593,8 @@ public class SecuritiesAccountTransactionManager_BF {
     	//   throw new IllegalArgumentException("argument <divDistrGross> has value <= 0.0");
     	// }
     	// Instead:
-    	if ( divDistrGross.doubleValue() == 0.0 ) {
-    		throw new IllegalArgumentException("argument <divDistrGross> has value = 0.0");
+    	if ( divDistrGross.compareTo(BigFraction.ZERO) == 0 ) {
+    		throw new IllegalArgumentException("argument <divDistrGross> has value = 0");
     	}
 
     	//	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
