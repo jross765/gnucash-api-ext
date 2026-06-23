@@ -60,7 +60,7 @@ public class SecuritiesAccountTransactionManager_FP {
     // ::MAGIC
     private static FixedPointNumber SPLIT_FACTOR_MIN = new FixedPointNumber("1/20"); 
     	// anything below that value is technically OK,
-        // but unplausible and thus forbidden.
+        // but implausible and thus forbidden.
     private static FixedPointNumber SPLIT_FACTOR_MAX = new FixedPointNumber("20");
     	// accordingly
     
@@ -663,12 +663,12 @@ public class SecuritiesAccountTransactionManager_FP {
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
     	if ( factor.isLessThan(SPLIT_FACTOR_MIN) ) {
-    		throw new IllegalArgumentException("argument <factor> has unplausible value (smaller than " + SPLIT_FACTOR_MIN + ")");
+    		throw new IllegalArgumentException("argument <factor> has implausible value (smaller than " + SPLIT_FACTOR_MIN + ")");
     	}
 
     	// ::TODO: cf. above
     	if ( factor.isGreaterThan(SPLIT_FACTOR_MAX) ) {
-    		throw new IllegalArgumentException("argument <factor> has unplausible value (greater than " + SPLIT_FACTOR_MAX + ")");
+    		throw new IllegalArgumentException("argument <factor> has implausible value (greater than " + SPLIT_FACTOR_MAX + ")");
     	}
 
     	// ---
@@ -760,12 +760,12 @@ public class SecuritiesAccountTransactionManager_FP {
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
     	if ( nofAddSharesAbs.isLessThan(SPLIT_NOF_ADD_SHARES_MIN) ) {
-    		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. smaller than " + SPLIT_NOF_ADD_SHARES_MIN + ")");
+    		throw new IllegalArgumentException("argument <nofAddShares> has implausible value (abs. smaller than " + SPLIT_NOF_ADD_SHARES_MIN + ")");
     	}
 
     	// ::TODO: Cf. above
     	if ( nofAddSharesAbs.isGreaterThan(SPLIT_NOF_ADD_SHARES_MAX) ) {
-    		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. greater than " + SPLIT_NOF_ADD_SHARES_MAX + ")");
+    		throw new IllegalArgumentException("argument <nofAddShares> has implausible value (abs. greater than " + SPLIT_NOF_ADD_SHARES_MAX + ")");
     	}
 
     	// CAUTION: Yes, it actually *is* possible that the no. of add. shares

@@ -41,6 +41,7 @@ public class SecuritiesAccountTransactionManager_BF {
     
     public enum Type {
     	BUY_STOCK,
+    	SELL_STOCK,
     	DIVIDEND,
     	DISTRIBUTION,
     	STOCK_SPLIT
@@ -69,13 +70,14 @@ public class SecuritiesAccountTransactionManager_BF {
     // Notes: 
     //  - It is common to specify stock (reverse) splits by a factor (e.g., 2 for a 2-for-1 split,
     //    or 1/4 for 1-for-4 reverse split). So why use the number of add. shares? Because that
-    //    is how GnuCash handles things, as opposed to GnuCash (cf. the sister project) , both 
+    //    is how GnuCash handles things, as opposed to KMyMoney (cf. the sister project) , both 
     //    on the data and the GUI level, and given that we want to have both projects as symmetrical 
     //    as possible, we copy that logic here, so that the user can choose between both methods.
-    //    Besides, the author has witnessed cases where the bank's statements provide wrong 
-    //    values for the factor (yes, a bank's software also has bugs), whereas the number of add. 
-    //    shares is practically always correct, given the usual bank-internal processes which
-    //    the author happens to know a thing or two about.
+    //    Besides, the author has witnessed cases where the bank's statements provide wrong or at least
+    //    misleading values for the factor (cf. comments on the methods genStockSplitTrx_factor() and
+    //    genStockSplitTrx_nofShares()), whereas the number of add. shares is practically always correct
+    //    and never misleading, given the usual bank-internal processes which the author happens to know 
+    //    a thing or two about.
     //  - As opposed to the factor above, a plausible range for the (abs.) number of additional 
     //    (to be subtracted) shares cannot as generally be specified. 
     //    E.g., European/US stocks tend to be priced above 1 EUR/USD, else they are considered penny 
@@ -484,16 +486,16 @@ public class SecuritiesAccountTransactionManager_BF {
      * @return a newly generated, modifiable transaction object
      */
     public static GnuCashWritableStockDividendTransaction genDividDistribTrx(
-    	    final GnuCashWritableFileImpl gcshFile,
-    	    final GCshAcctID stockAcctID,
-    	    final GCshAcctID incomeAcctID,
-    	    final GCshAcctID taxFeeAcctID,
-    	    final GCshAcctID offsetAcctID,
-    	    final GnuCashTransactionSplit.Action spltAct,
-    	    final BigFraction divDistrGross,
-    	    final BigFraction taxesFees,
-    	    final LocalDate postDate,
-    	    final String descr) {
+		final GnuCashWritableFileImpl gcshFile,
+		final GCshAcctID stockAcctID,
+		final GCshAcctID incomeAcctID,
+		final GCshAcctID taxFeeAcctID,
+		final GCshAcctID offsetAcctID,
+		final GnuCashTransactionSplit.Action spltAct,
+		final BigFraction divDistrGross,
+		final BigFraction taxesFees,
+		final LocalDate postDate,
+		final String descr) {
     	Collection<AcctIDAmountBFPair> expensesAcctAmtList = new ArrayList<AcctIDAmountBFPair>();
 	
     	if ( taxesFees == null ) {
@@ -538,15 +540,15 @@ public class SecuritiesAccountTransactionManager_BF {
      * @return a newly generated, modifiable transaction object
      */
     public static GnuCashWritableStockDividendTransaction genDividDistribTrx(
-    	    final GnuCashWritableFileImpl gcshFile,
-    	    final GCshAcctID stockAcctID,
-    	    final GCshAcctID incomeAcctID,
-    	    final Collection<AcctIDAmountBFPair> expensesAcctAmtList,
-    	    final GCshAcctID offsetAcctID,
-    	    final GnuCashTransactionSplit.Action spltAct,
-    	    final BigFraction divDistrGross,
-    	    final LocalDate postDate,
-    	    final String descr) {
+		final GnuCashWritableFileImpl gcshFile,
+		final GCshAcctID stockAcctID,
+		final GCshAcctID incomeAcctID,
+		final Collection<AcctIDAmountBFPair> expensesAcctAmtList,
+		final GCshAcctID offsetAcctID,
+		final GnuCashTransactionSplit.Action spltAct,
+		final BigFraction divDistrGross,
+		final LocalDate postDate,
+		final String descr) {
     	if ( gcshFile == null ) {
     		throw new IllegalArgumentException("argument <gcshFile> is null");
     	}
@@ -603,8 +605,8 @@ public class SecuritiesAccountTransactionManager_BF {
     	//	    }
     	//	}
 
-    	LOGGER.debug("genDividDistribTrx: Account 1 name (stock):      '" + gcshFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
-    	LOGGER.debug("genDividDistribTrx: Account 2 name (income):     '" + gcshFile.getAccountByID(incomeAcctID).getQualifiedName() + "'");
+    	LOGGER.debug("genDividDistribTrx: Account 1 name (stock): '" + gcshFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
+    	LOGGER.debug("genDividDistribTrx: Account 2 name (income): '" + gcshFile.getAccountByID(incomeAcctID).getQualifiedName() + "'");
     	int counter = 1;
     	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		LOGGER.debug("genDividDistribTrx: Account 3." + counter + " name (expenses): '" + gcshFile.getAccountByID(elt.accountID()).getQualifiedName() + "'");
@@ -750,10 +752,13 @@ public class SecuritiesAccountTransactionManager_BF {
      * In english-speaking countries, people tend to say "3-for-1" ("3 new shares for 1 old share") 
      * when they mean a threefold-increase of the stocks, whereas in Germany, e.g., it tends
      * to be the other way round, i.e. "Aktiensplit 1:4" ("eine alte zu 4 neuen Aktien") is a 
-     * "4-for-1" split).
+     * "4-for-1" split), or even worse: "Aktiensplit 1:3" when they actually mean a factor
+     * of 4 (sic). One might think that traders and bank personnel from continental Europe
+     * did not have maths in school...
      * 
      * Also, please be aware that GnuCash does <b>not</b> use the factor-logic, neither internally
-     * nor on the GUI, but instead only shows and stores the number of additional shares.
+     * nor on the GUI, but instead only shows and stores the number of additional shares
+     * (which will be negative in case of a reverse split).
      * @param postDate
      * @param descr
      * @return a new share-(reverse-)split transaction
@@ -790,12 +795,12 @@ public class SecuritiesAccountTransactionManager_BF {
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
     	if ( factor.compareTo(SPLIT_FACTOR_MIN) < 0 ) {
-    		throw new IllegalArgumentException("argument <factor> has unplausible value (smaller than " + SPLIT_FACTOR_MIN + ")");
+    		throw new IllegalArgumentException("argument <factor> has implausible value (smaller than " + SPLIT_FACTOR_MIN + ")");
     	}
 
     	// ::TODO: cf. above
     	if ( factor.compareTo(SPLIT_FACTOR_MAX) > 0 ) {
-    		throw new IllegalArgumentException("argument <factor> has unplausible value (greater than " + SPLIT_FACTOR_MAX + ")");
+    		throw new IllegalArgumentException("argument <factor> has implausible value (greater than " + SPLIT_FACTOR_MAX + ")");
     	}
 
     	// ---
@@ -841,8 +846,9 @@ public class SecuritiesAccountTransactionManager_BF {
      * then you have 25 shares left, i.e. the number of shares as decreased by a factor
      * of 1/4 (1-for-4). 
      * 
-     * Also, please be aware that GnuCash does not use the factor-logic, neither internally
-     * nor on the GUI, but instead only shows and stores the number of additional shares.
+     * Also, please be aware that GnuCash does <b>not</b> use the factor-logic, neither internally
+     * nor on the GUI, but instead only shows and stores the number of additional shares
+     * (which will be negative in case of a reverse split).
      * @param postDate
      * @param descr
      * @return a new share-(reverse-)split transaction
@@ -851,11 +857,11 @@ public class SecuritiesAccountTransactionManager_BF {
      * @see #genStockSplitTrx(GnuCashWritableFileImpl, GCshAcctID, StockSplitVar, BigFraction, LocalDate, String)
      */
     public static GnuCashWritableStockSplitTransaction genStockSplitTrx_nofShares(
-    	    final GnuCashWritableFileImpl gcshFile,
-    	    final GCshAcctID stockAcctID,
-    	    final BigFraction nofAddShares, // use neg. number in case of reverse stock-split
-    	    final LocalDate postDate,
-    	    final String descr) {
+		final GnuCashWritableFileImpl gcshFile,
+		final GCshAcctID stockAcctID,
+		final BigFraction nofAddShares, // use neg. number in case of reverse stock-split
+		final LocalDate postDate,
+		final String descr) {
     	if ( gcshFile == null ) {
     		throw new IllegalArgumentException("argument <gcshFile> is null");
     	}
@@ -887,12 +893,12 @@ public class SecuritiesAccountTransactionManager_BF {
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
     	if ( nofAddSharesAbs.compareTo(SPLIT_NOF_ADD_SHARES_MIN) < 0 ) {
-    		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. smaller than " + SPLIT_NOF_ADD_SHARES_MIN + ")");
+    		throw new IllegalArgumentException("argument <nofAddShares> has implausible value (abs. smaller than " + SPLIT_NOF_ADD_SHARES_MIN + ")");
     	}
 
     	// ::TODO: Cf. above
     	if ( nofAddSharesAbs.compareTo(SPLIT_NOF_ADD_SHARES_MAX) > 0 ) {
-    		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. greater than " + SPLIT_NOF_ADD_SHARES_MAX + ")");
+    		throw new IllegalArgumentException("argument <nofAddShares> has implausible value (abs. greater than " + SPLIT_NOF_ADD_SHARES_MAX + ")");
     	}
 
     	// CAUTION: Yes, it actually *is* possible that the no. of add. shares
