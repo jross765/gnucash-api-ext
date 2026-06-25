@@ -120,7 +120,7 @@ public class SecuritiesAccountTransactionManager_BF {
      * 
      * @see #genBuyStockTrx(GnuCashWritableFileImpl, GCshAcctID, Collection, GCshAcctID, BigFraction, BigFraction, LocalDate, String)
      */
-    public static GnuCashWritableStockBuySellTransaction genBuyStockTrx(
+    public static GnuCashWritableStockBuyTransaction genBuyStockTrx(
     		final GnuCashWritableFileImpl gcshFile,
     		final GCshAcctID stockAcctID,
     		final GCshAcctID taxFeeAcctID,
@@ -184,7 +184,7 @@ public class SecuritiesAccountTransactionManager_BF {
     		final BigFraction stockPrc,
     		final LocalDate postDate,
     		final String descr) {
-    	if ( nofStocks.doubleValue() <= 0.0 ) {
+    	if ( nofStocks.compareTo(BigFraction.ZERO) <= 0 ) {
     		throw new IllegalArgumentException("argument <nofStocks> is <= 0");
     	}
     	
@@ -200,7 +200,7 @@ public class SecuritiesAccountTransactionManager_BF {
     // ---------------------------------------------------------------
     
     /**
-     * Generates a transaction that buys a given number of stocks  
+     * Generates a transaction that sells a given number of stocks  
      * for a specific security's stock account at a given price, 
      * and generates additional splits for taxes/fees
      * (simple variant).
@@ -251,7 +251,7 @@ public class SecuritiesAccountTransactionManager_BF {
     }
     
     /**
-     * Generates a transaction that buys a given number of stocks
+     * Generates a transaction that sells a given number of stocks
      * for a specific security's stock account at a given price, 
      * and generates additional splits for taxes/fees
      * (general variant).
@@ -272,7 +272,7 @@ public class SecuritiesAccountTransactionManager_BF {
      * 
      * @see #genSellStockTrx(GnuCashWritableFileImpl, GCshAcctID, GCshAcctID, GCshAcctID, BigFraction, BigFraction, BigFraction, LocalDate, String)
      * @see #genBuyStockTrx(GnuCashWritableFileImpl, GCshAcctID, GCshAcctID, GCshAcctID, BigFraction, BigFraction, BigFraction, LocalDate, String)
-     * @see #genBuyStockTrx(GnuCashyWritableFileImpl, GCshAcctID, Collection, GCshAcctID, BigFraction, BigFraction, LocalDate, String)
+     * @see #genBuyStockTrx(GnuCashWritableFileImpl, GCshAcctID, Collection, GCshAcctID, BigFraction, BigFraction, LocalDate, String)
      */
     public static GnuCashWritableStockSellTransaction genSellStockTrx(
     		final GnuCashWritableFileImpl gcshFile,
@@ -283,7 +283,7 @@ public class SecuritiesAccountTransactionManager_BF {
     		final BigFraction stockPrc,
     		final LocalDate postDate,
     		final String descr) {
-    	if ( nofStocks.doubleValue() <= 0.0 ) {
+    	if ( nofStocks.compareTo(BigFraction.ZERO) <= 0 ) {
     		throw new IllegalArgumentException("argument <nofStocks> is <= 0");
     	}
     	
@@ -387,8 +387,9 @@ public class SecuritiesAccountTransactionManager_BF {
     	}
 
     	GnuCashAccount offsetAcct = gcshFile.getAccountByID(offsetAcctID);
-    	if ( offsetAcct.getType() != GnuCashAccount.Type.BANK ) {
-    		throw new IllegalArgumentException("Account with ID " + offsetAcctID + " is not of type " + GnuCashAccount.Type.BANK);
+    	if ( offsetAcct.getType() != GnuCashAccount.Type.BANK &&
+    		 offsetAcct.getType() != GnuCashAccount.Type.ASSET ) {
+    		throw new IllegalArgumentException("Account with ID " + offsetAcctID + " is not of type " + GnuCashAccount.Type.BANK + " or " + GnuCashAccount.Type.ASSET);
     	}
 
     	// ---
@@ -419,7 +420,10 @@ public class SecuritiesAccountTransactionManager_BF {
     	GnuCashWritableTransactionSplit splt2 = genTrx.createWritableSplit(stockAcct);
     	splt2.setValue(amtNet);
     	splt2.setQuantity(nofStocks);
-    	splt2.setAction(GnuCashTransactionSplit.Action.BUY);
+    	if ( nofStocks.compareTo(BigFraction.ZERO) > 0 )
+    		splt2.setAction(GnuCashTransactionSplit.Action.BUY);
+    	else
+    		splt2.setAction(GnuCashTransactionSplit.Action.SELL);
     	LOGGER.debug("genBuySellStockTrxCore: Split 2 to write: " + splt2.toString());
 
     	// ---
@@ -635,8 +639,9 @@ public class SecuritiesAccountTransactionManager_BF {
     	}
 	
     	GnuCashAccount offsetAcct = gcshFile.getAccountByID(offsetAcctID);
-    	if ( offsetAcct.getType() != GnuCashAccount.Type.BANK ) {
-    		throw new IllegalArgumentException("Account with ID " + offsetAcctID + " is not of type " + GnuCashAccount.Type.BANK);
+    	if ( offsetAcct.getType() != GnuCashAccount.Type.BANK &&
+    		 offsetAcct.getType() != GnuCashAccount.Type.ASSET ) {
+    		throw new IllegalArgumentException("Account with ID " + offsetAcctID + " is not of type " + GnuCashAccount.Type.BANK + " or " + GnuCashAccount.Type.ASSET);
     	}
 
     	// ---
