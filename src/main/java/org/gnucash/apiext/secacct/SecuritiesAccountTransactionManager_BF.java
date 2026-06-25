@@ -138,7 +138,7 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	// CAUTION: The following two: In fact, this can happen
     	// (negative booking after cancellation / Stornobuchung)
-	// if ( taxesFees.doubleValue() <= 0.0 ) {
+	// if ( taxesFees.compareTo(BigFraction.ZERO) <= 0 ) {
 	//   throw new IllegalArgumentException("argument <taxesFees> has value <= 0.0");
 	// }
 
@@ -237,7 +237,7 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	// CAUTION: The following two: In fact, this can happen
     	// (negative booking after cancellation / Stornobuchung)
-	// if ( taxesFees.doubleValue() <= 0.0 ) {
+	// if ( taxesFees.compareTo(BigFraction.ZERO) <= 0 ) {
 	//   throw new IllegalArgumentException("argument <taxesFees> has value <= 0.0");
 	// }
 
@@ -508,7 +508,7 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	// CAUTION: The following two: In fact, this can happen
     	// (negative booking after cancellation / Stornobuchung)
-	// if ( taxesFees.doubleValue() <= 0.0 ) {
+	// if ( taxesFees.compareTo(BigFraction.ZERO) <= 0 ) {
 	//   throw new IllegalArgumentException("argument <taxesFees> has value <= 0.0");
 	// }
 
@@ -595,7 +595,7 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	// CAUTION: The following two: In fact, this can happen
     	// (negative booking after cancellation / Stornobuchung)
-    	// if ( divDistrGross.doubleValue() <= 0.0 ) {
+    	// if ( divDistrGross.compareTo(BigFraction.ZERO) <= 0 ) {
     	//   throw new IllegalArgumentException("argument <divDistrGross> has value <= 0.0");
     	// }
     	// Instead:
@@ -604,7 +604,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	}
 
     	//	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
-    	//	    if ( elt.amount().doubleValue() <= 0.0 ) {
+    	//	    if ( elt.amount().compareTo(BigFraction.ZERO) <= 0 ) {
     	//		throw new IllegalArgumentException("expense <= 0.0 given");
     	//	    }
     	//	}
