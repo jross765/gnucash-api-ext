@@ -271,19 +271,19 @@ public class TestSecuritiesAccountTransactionManager_FP {
 		assertEquals(GnuCashTransactionSplit.Action.BUY.getLocaleString(), splt1.getActionStr());
 		assertEquals(BUY_NOF_STOCKS, splt1.getQuantity());
 		assertEquals(BUY_NET_PRC, splt1.getValue());
-		assertEquals("", splt1.getDescription());
+		assertEquals(null, splt1.getDescription());
 
 		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID());
 		assertEquals(null, splt2.getAction());
 		assertEquals(BUY_GROSS_PRC.copy().negate(), splt2.getQuantity());
 		assertEquals(BUY_GROSS_PRC.copy().negate(), splt2.getValue());
-		assertEquals("", splt2.getDescription());
+		assertEquals(null, splt2.getDescription());
 
 		assertEquals(BUY_EXP_ACCT_1_ID, splt3.getAccountID());
 		assertEquals(null, splt3.getAction());
 		assertEquals(BUY_EXP_1, splt3.getQuantity());
 		assertEquals(BUY_EXP_1, splt3.getValue());
-		assertEquals("", splt3.getDescription());
+		assertEquals(null, splt3.getDescription());
 	}
 
 	@Test
@@ -434,32 +434,32 @@ public class TestSecuritiesAccountTransactionManager_FP {
 		assertEquals(0.0, splt1.getQuantity().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(0.0, splt1.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		// .
-		assertEquals("", splt1.getDescription());
+		assertEquals(null, splt1.getDescription());
 
 		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID());
 		assertEquals(null, splt2.getAction());
 		assertEquals(DIV_NET, splt2.getQuantity());
 		assertEquals(DIV_NET, splt2.getValue());
-		assertEquals("", splt2.getDescription());
+		assertEquals(null, splt2.getDescription());
 
 		assertEquals(INCOME_ACCT_ID, splt3.getAccountID());
 		assertEquals(null, splt3.getAction());
 		assertEquals(DIV_GROSS.copy().negate(), splt3.getQuantity());
 		assertEquals(DIV_GROSS.copy().negate(), splt3.getValue());
-		assertEquals("", splt3.getDescription());
+		assertEquals(null, splt3.getDescription());
 
 		assertEquals(DIV_EXP_ACCT_1_ID, splt4.getAccountID());
 		assertEquals(null, splt4.getAction());
 		assertEquals(DIV_EXP_1, splt4.getQuantity());
 		assertEquals(DIV_EXP_1, splt4.getValue());
-		assertEquals("", splt4.getDescription());
+		assertEquals(null, splt4.getDescription());
 
 		assertEquals(DIV_EXP_ACCT_2_ID, splt5.getAccountID());
 		assertEquals(null, splt5.getAction());
 		assertEquals(DIV_EXP_2, splt5.getQuantity());
 		assertEquals(DIV_EXP_2, splt5.getValue());
 
-		assertEquals("", splt5.getDescription());
+		assertEquals(null, splt5.getDescription());
 	}
 
 	@Test

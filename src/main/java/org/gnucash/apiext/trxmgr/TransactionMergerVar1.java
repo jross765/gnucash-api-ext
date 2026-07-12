@@ -1,6 +1,5 @@
 package org.gnucash.apiext.trxmgr;
 
-import org.gnucash.api.read.GnuCashTransaction;
 import org.gnucash.api.write.GnuCashWritableFile;
 import org.gnucash.api.write.GnuCashWritableTransaction;
 import org.gnucash.base.basetypes.simple.GCshTrxID;
@@ -22,13 +21,15 @@ public class TransactionMergerVar1 extends TransactionMergerBase
     
     // ---------------------------------------------------------------
     
+	@Override
 	public void merge(GCshTrxID survivorID, GCshTrxID dierID) throws MergePlausiCheckException {
-		GnuCashTransaction survivor = gcshFile.getTransactionByID(survivorID);
+		GnuCashWritableTransaction survivor = gcshFile.getWritableTransactionByID(survivorID);
 		GnuCashWritableTransaction dier = gcshFile.getWritableTransactionByID(dierID);
 		merge(survivor, dier);
 	}
 
-	public void merge(GnuCashTransaction survivor, GnuCashWritableTransaction dier) throws MergePlausiCheckException {
+	@Override
+	public void merge(GnuCashWritableTransaction survivor, GnuCashWritableTransaction dier) throws MergePlausiCheckException {
 		// 1) Perform plausi checks
 		if ( ! plausiCheck(survivor, dier) ) {
 			LOGGER.error("merge: survivor-dier-pair did not pass plausi check: " + survivor.getID() + "/" + dier.getID());
