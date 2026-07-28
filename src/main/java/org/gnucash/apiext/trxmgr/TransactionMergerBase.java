@@ -59,7 +59,7 @@ public abstract class TransactionMergerBase {
 		}
 		
 		if ( Math.abs( survDateFromJul - dierDateToJul ) > Const.DIFF_TOLERANCE_DAYS ) {
-			LOGGER.warn("plausiCheck: Survivor- and dier-transaction do not have the same post-date");
+			LOGGER.warn("plausiCheck: Survivor- and dier-transaction's post-date are more than " + Const.DIFF_TOLERANCE_DAYS + " days apart");
 			LOGGER.debug("plausiCheck: Survivor-date: " + survivor.getDatePosted());
 			LOGGER.debug("plausiCheck: Dier-date: " + dier.getDatePosted());
 			return false;
@@ -71,10 +71,10 @@ public abstract class TransactionMergerBase {
 			return false;
 		}
 		
-		if ( ! trxMgr.isSane(dier) ) {
-			LOGGER.warn("plausiCheck: Dier-transaction is not sane");
-			return false;
-		}
+//		if ( ! trxMgr.isSane(dier) ) {
+//			LOGGER.warn("plausiCheck: Dier-transaction is not sane");
+//			return false;
+//		}
 		
 		if ( ! ( trxMgr.hasSplitBoundToAccounttType(survivor, GnuCashAccount.Type.BANK) &&
 			     trxMgr.hasSplitBoundToAccounttType(dier, GnuCashAccount.Type.BANK) 
