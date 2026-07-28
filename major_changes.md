@@ -11,6 +11,16 @@ Followed the deprecation of `FixedPointNumber` in the modules
 
 * Usual maintenance: Fixed small bugs, small improvements, low-level code-cleaning.
 
+In more detail:
+
+* Package SecAcct: Small improvements.
+
+* Package TrxMgr: 
+  * `SecuritiesAccountTransactionManager_[BF|FP]`:
+     * Added method `genSellStockTrx()` (both variants).
+     * Used newly-introduced types `KMyMoney(Writable)Stock[Buy|Sell]Transaction`.
+     * A number of small improvements.
+
 ## V. 1.7 &rarr; 1.8
 Adapted to module "Base", V. 1.8 and "API Specialized Entities", V. 0.3.
 

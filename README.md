@@ -42,15 +42,36 @@ This package contains classes that help to...
 Cf. document "[Major Changes](https://github.com/jross765/JGnuCashLibNTools/gnucash-api-ext/major_changes.md)".
 
 ## Planned
-* Package SecAcct: 
-	* More variants of buy/sell/dividend/etc. transactions, including wrappers which you provide account names to instead of account IDs.
-	* Possibly new class for high-level consistency checks of existing transactions, e.g.: All dividends of domestic shares are actually posted to the domestic dividend account.
+It should go without saying, but the following items are of course subject to change and 
+by no means a promise that they will actually be implemented soon:
 
-* New package for accounting-macros, such as closing the books.
+* Package `SecAcct`: 
+	* More variants of buy/sell/dividend/etc. transactions, including wrappers which you provide account names to instead of account IDs.
+	* *Possibly*: New class for high-level consistency checks of existing transactions, e.g.: All dividends of domestic shares are actually posted to the domestic dividend account.
+
+* New package for accounting-macros for more complex stuff.
+
+  Currently, the author sees two candidates for this:
+
+  * Closing the books: This actually already has been implemented in
+    the tool `CloseBooks` (cf. module "Tools"), and the code there
+    is so simple that it's not really worth while opening a new 
+    package for it.
+  * Correct and efficient handling of crypto-currency transactions:
+    Actually, that one is already in the pipeline and about to undergo
+    some testing, but it's not published yet. Please be patient.
 
 * New package for management of securities and currencies (esp. bulk quote import).
 
-* New package for management of customer jobs and invoices and possibly employee vouchers.
+  The author actually already has written such a module as well as several tools based on it, 
+  but he cannot publish them in the current state, as they...
+  * have additional dependencies that are not generally available, and 
+  * they are too tightly embedded in and tailored to his specific 
+    working environment and needs, i.e. not general enough.
+
+  One day, when he finds some time, he might get this to-do done. Please be patient.
+
+* *Possibly*: New package for management of customer jobs and invoices and possibly employee vouchers.
 
 ## Known Issues
 
