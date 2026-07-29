@@ -358,7 +358,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	}
 	
     	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
-    		if ( elt.amount().doubleValue() <= 0.0 ) {
+    		if ( elt.amount().compareTo(BigFraction.ZERO) <= 0 ) {
     			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is <= 0.0");
     		}
     	}
