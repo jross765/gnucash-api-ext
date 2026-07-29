@@ -198,39 +198,47 @@ public class TransactionMergerVar2 extends TransactionMergerBase
     // ---------------------------------------------------------------
 	
 	private GnuCashWritableTransactionSplit copyBankTrxSplt() {
-		GnuCashWritableTransactionSplit copy = survTrx.createWritableSplit(zDierTrxBankSplt.getAccount());
+		GnuCashWritableTransactionSplit spltCopy = survTrx.createWritableSplit(zDierTrxBankSplt.getAccount());
 
-		if ( zDierTrxBankSplt.getAction() != null )
-			copy.setAction(zDierTrxBankSplt.getAction());
+		if ( zDierTrxBankSplt.getAction() != null ) {
+			spltCopy.setAction(zDierTrxBankSplt.getAction());
+		} else {
+			spltCopy.unsetAction();
+		}
 		
-		copy.setAccountID(zSurvTrxBankSpltBefore.getAccountID());
+		spltCopy.setAccountID(zSurvTrxBankSpltBefore.getAccountID());
 		
-		copy.setValue(zDierTrxBankSplt.getValueRat());
-		copy.setQuantity(zDierTrxBankSplt.getQuantityRat());
-		
-		if ( zDierTrxBankSplt.getReconState() != null )
-			copy.setReconState(zDierTrxBankSplt.getReconState());
+		spltCopy.setValue(zDierTrxBankSplt.getValueRat());
+		spltCopy.setQuantity(zDierTrxBankSplt.getQuantityRat());
 		
 		if ( zDierTrxBankSplt.getDescription() != null )
-			copy.setDescription(zDierTrxBankSplt.getDescription());
+			spltCopy.setDescription(zDierTrxBankSplt.getDescription());
 
+		if ( zDierTrxBankSplt.getReconState() != null ) {
+			spltCopy.setReconState(zDierTrxBankSplt.getReconState());
+		} else {
+			spltCopy.setReconState( GnuCashTransactionSplit.ReconState.NOT_RECONCILED );
+		}
+		 
+		// ---
+		
 		if ( zDierTrxBankSplt.getUserDefinedAttributeKeys() != null ) {
 			for ( String attrKey : zDierTrxBankSplt.getUserDefinedAttributeKeys() ) {
-				if ( copy.getUserDefinedAttributeKeys() != null ) {
-					if ( copy.getUserDefinedAttributeKeys().contains(attrKey) ) {
-						copy.setUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
+				if ( spltCopy.getUserDefinedAttributeKeys() != null ) {
+					if ( spltCopy.getUserDefinedAttributeKeys().contains(attrKey) ) {
+						spltCopy.setUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
 					} else {
-						copy.addUserDefinedAttribute( ((GnuCashWritableTransactionSplitImpl) zDierTrxBankSplt).getUserDefinedAttributeType(attrKey), 
+						spltCopy.addUserDefinedAttribute( ((GnuCashWritableTransactionSplitImpl) zDierTrxBankSplt).getUserDefinedAttributeType(attrKey), 
 													  attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
 					}
 				} else {
-					copy.addUserDefinedAttribute( ((GnuCashWritableTransactionSplitImpl) zDierTrxBankSplt).getUserDefinedAttributeType(attrKey),
+					spltCopy.addUserDefinedAttribute( ((GnuCashWritableTransactionSplitImpl) zDierTrxBankSplt).getUserDefinedAttributeType(attrKey),
 												  attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
 				}
 			} // for
 		}
 		
-		return copy;
+		return spltCopy;
 	}
 
 }
