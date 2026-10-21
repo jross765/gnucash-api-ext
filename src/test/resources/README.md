@@ -1,8 +1,13 @@
 # Technical Aspects
 The test file has been generated with 
-Gnucash V. 5.12.
+Gnucash V. 5.17.
 
-Please note that the file contains *german* data, and not only superficially (i.e., german account names etc.), but also under the hood: GnuCash stores some (semi-)internal information in locale-specific form. This file has been generated on a german system (locale de_DE), and it probably should not be used / changed on a system with another locale.
+## The Main Test Data File `test.gnucash`
+
+Please note that the file contains *german* data, and not only superficially (i.e., german account names etc.), 
+but also under the hood: GnuCash stores some (semi-)internal information in locale-specific form. This file has 
+been generated on a german system (locale de_DE), and it probably should not be used / changed on a system with 
+another locale.
 
 [ In future releases, we will therefore probably provide one test data file per supported locale. ]
 
@@ -11,10 +16,11 @@ When you change the
 file, please save it in *compressed* XML format (as opposed to module "API").
 
 # Testing Aspects
-Please be careful when making changes on the file: All JUnit test cases of this module heavily depend on it, and you might break things.
+Please be careful when making changes on the file: 
+All JUnit test cases of this module heavily depend on it, and you might break things.
 
 # Comparison to Other Modules' Test Files
-This test file *originated* from the one of module "API", but it is *not identical* to it.
+This test file *originated* from the one of module "API (Core)", but it is *not identical* to it.
 
 Main differences:
 
@@ -30,5 +36,3 @@ However, for organizational reasons, we now
 (i.e, V. 1.7-RESTRUCT and onwards) 
 have a separate, redundant copy for this module. Therefore, the two files will very likely not stay identical. Please expect them to divert from one another in the course of the releases to come.
 
-# Accounting Aspects
-Cf. the notes in module "API"'s README file for this aspect.
